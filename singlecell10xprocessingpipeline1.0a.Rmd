@@ -1,0 +1,274 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+factors affecting integration outcome
+1 return.only.var.genes in SCtransform
+2 nfeatures call SelectIntegrationFeatures
+3 features.to.integrate argument in IntegrateData
+
+Selected parameter for integration
+return.only.var.genes = TRUE 
+nfeatures = results from FindIntegrationAnchors (4174)
+features.to.integrate = NULL
+
+
+loadlibrary
+```{r}
+library(tidyverse) #manipulate table
+library(Seurat) #process single cell data**main package** 
+library(SeuratWrappers) #import loom file
+library(velocyto.R) #RNA trajectory
+library(biomaRt) #fetch gene info
+library(ggplot2) #visualisation
+library(gridExtra) #combine plot
+library(grid) #combine plot2
+library(sctransform) #normalise single cell data 
+library(DoubletFinder) #eliminate doublet
+library(future) #paralell processing
+```
+set parameters for paralell processing
+```{r}
+future::plan(strategy = 'multicore', workers = 12) #set 12 cores
+options(future.globals.maxSize = 10 * 1024 ^ 3) #estimated ram requirement for the parallel process = 10 Gb
+```
+because parallel processing doesn't work on Rstudio environment, the working version of this code will be rscript. This file will be use for code description instead.
+
+define function
+
+read .loom file
+```{r}
+import_loom<-function(){
+  print("read .loom file...")
+  CB_D4.ldat <- ReadVelocity(file = "/insert_loom_file_directory_here/D4.loom")
+  CB_D6.ldat <- ReadVelocity(file = "/insert_loom_file_directory_here/D6.loom")
+  CB_D8.ldat <- ReadVelocity(file = "/insert_loom_file_directory_here/D8.loom")
+  loom_list<-list(CB_D4.ldat,CB_D6.ldat,CB_D8.ldat)
+  return(loom_list)
+}
+```
+
+load cellrangerv3 files
+```{r}
+import_cellranger_v3<-function(){
+  print("load cellrangerv3 files...")
+  D4.data<-Read10X(data.dir="/insert_10x_files_directory_here/filtered_feature_bc_matrix/")
+  D6.data<-Read10X(data.dir="/insert_10x_files_directory_here/filtered_feature_bc_matrix/")
+  D8.data<-Read10X(data.dir="/insert_10x_files_directory_here/filtered_feature_bc_matrix/")
+  cellranger_list<-list(D4.data,D6.data,D8.data)
+  return(cellranger_list)
+}
+```
+
+create seurat object
+```{r}
+create_seurat_object<-function(cellranger_list){
+  print("create seurat object from cellranger...")
+  seurat_list<-list()
+  for(i in 1:length(cellranger_list)){
+    seurat_list[[i]]<-CreateSeuratObject(counts = cellranger_list[[i]], project = "cordblood_v3", min.cells = 3, min.features = 200) #cell needs to express at least 200 genes
+  }
+  return(seurat_list)
+}
+```
+
+convesion of .loom to assay object
+```{r}
+loom_to_seurat<-function(loomobject,seuratobject,id){
+  print("begin .loom conversion process...")
+  for (i in names(x = loomobject)) {
+  print("Store assay in a new variable...")
+  assay <- loomobject[[i]]
+  
+  print("Rename cell names in loom file to match cell names in Seurat object...")
+  colnames(assay) <- gsub(paste0('possorted_genome_bam_',id,':'), '', colnames(assay))
+  colnames(assay) <- gsub('x', '', colnames(assay))
+  print("Subset to filtered cells in Seurat object...")
+  assay <- assay[,colnames(seuratobject)]
+  
+  #Add loom data (assay) to Seurat object
+  seuratobject[[i]] <- CreateAssayObject(counts = assay)
+  
+  }
+  return(seuratobject)
+}
+```
+
+conversion process 
+```{r}
+loom_conversion<-function(loom_list,seurat_list){
+  for(i in 1:length(seurat_list)){
+    loom_id<-c("5MTBG","MZJBB","JKMX4") #find id from loom file
+    seurat_list[[i]]<-loom_to_seurat(loomobject = loom_list[[i]],seuratobject = seurat_list[[i]],id=loom_id[i])
+  }
+  return(seurat_list)
+}
+```
+count and subset percent mt (high mito genes = bad quality)
+```{r}
+count_and_subset_mt<-function(seurat_list){
+  print("count mitogene percentage...")
+  for(i in 1:length(seurat_list)){
+  seurat_list[[i]][["percent.mt"]]<-PercentageFeatureSet(seurat_list[[i]], pattern = "^MT-")  
+  print("subsetting...")
+  seurat_list[[i]]<-subset(seurat_list[[i]], percent.mt<=10)
+  }
+  return(seurat_list)
+}
+```
+
+assign time point to the dataset
+```{r}
+time_assignment<-function(seurat_list){
+  print("assign time...")
+  time<-c("D4","D6","D8")
+  for(i in 1:length(seurat_list)){
+  seurat_list[[i]]$time<-time[i]
+  }
+  return(seurat_list)
+}
+```
+
+apply SCtransform to the list
+```{r message=FALSE, warning=FALSE}
+sctransform_processing<-function(seurat_list,return.only.var.genes = FALSE){
+  print("run SCtransform")
+  for (i in 1:length(seurat_list)){
+    seurat_list[[i]] <- SCTransform(seurat_list[[i]], verbose = FALSE, return.only.var.genes = FALSE)
+   }
+  return(seurat_list)
+}
+```
+dimensional redution
+```{r}
+dimensionalreduction<-function(seurat_list){
+  #general purpose dimensional reduction 
+  #check whether the input is a list first 
+  #loop for list, single sequence for single file
+  if(seurat_list%>%is.list){
+    for (i in 1:length(seurat_list)) {
+      seurat_list[[i]] <- RunPCA(seurat_list[[i]])
+      seurat_list[[i]] <- FindNeighbors(object = seurat_list[[i]], dims = 1:30)
+      seurat_list[[i]] <- FindClusters(object = seurat_list[[i]], resolution = 0.8)
+      seurat_list[[i]] <- RunTSNE(seurat_list[[i]], dims = 1:30)
+      seurat_list[[i]] <- RunUMAP(seurat_list[[i]], dims = 1:30)
+    }
+  }
+  else{
+    seurat_list <- RunPCA(seurat_list)
+    seurat_list <- FindNeighbors(object = seurat_list, dims = 1:30)
+    seurat_list <- FindClusters(object = seurat_list, resolution = 0.8)
+    seurat_list <- RunTSNE(seurat_list, dims = 1:30)
+    seurat_list <- RunUMAP(seurat_list, dims = 1:30)
+  }
+  return(seurat_list)
+}
+```
+
+doublet finding protocal
+```{r message=FALSE, warning=FALSE}
+find_doublet<-function(seurat_list){
+  for (i in 1:length(seurat_list)) {
+    print(paste0("start ",i))
+    print("pK Identification (no ground-truth)")
+    sweep.res.list_temp <- paramSweep_v3(seurat_list[[i]], PCs = 1:30, sct = TRUE,num.cores = 12)
+    sweep.stats_temp <- summarizeSweep(sweep.res.list_temp, GT = FALSE)
+    pK_object <- find.pK(sweep.stats_temp)
+    pK_value<-pK_object%>%filter(MeanBC==max(MeanBC))%>%dplyr::select(pK)%>%unlist%>%as.character()%>%as.numeric()
+    print("Homotypic Doublet Proportion Estimate")
+    annotations <- seurat_list[[i]]@meta.data$seurat_clusters
+    annotations <- as.character(annotations)
+    homotypic.prop <- modelHomotypic(annotations)           
+    nExp_poi <- round(0.039*length(seurat_list[[i]]%>%colnames))  ##doublet formation rate from 10x 
+    nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+##pK<0.1
+    print("Run DoubletFinder with varying classification stringencies")
+    #please refer to doubletFinder_v3 paper for pN, pK and mExp calculation
+    seurat_list[[i]]  <- doubletFinder_v3(seurat_list[[i]] , PCs = 1:30, pN = 0.25, pK = pK_value, nExp = nExp_poi, reuse.pANN = FALSE, sct = TRUE)
+    seurat_list[[i]]  <- doubletFinder_v3(seurat_list[[i]] , PCs = 1:30, pN = 0.25, pK = pK_value, nExp = nExp_poi.adj, reuse.pANN = paste0("pANN_0.25_",pK_value,"_",nExp_poi), sct = TRUE)
+    print(paste0("finish ",i))
+  }
+  return(seurat_list)
+}
+```
+
+transfer doublet metadata to clean seurat
+```{r}
+add_metadata_to_clean<-function(serat_doublet,seurat_clean){
+  for (i in 1:length(serat_doublet)) {
+    seurat_clean[[i]]$DF.classifications<-serat_doublet[[i]]@meta.data[,ncol(serat_doublet[[i]]@meta.data)]
+  }
+  return(seurat_clean)
+}
+```
+```{r}
+4
+```
+
+
+filter out doublet from the dataset
+```{r}
+eliminate_doublet<-function(seurat_list){
+  for (i in 1:length(seurat_list)) {
+    seurat_list[[1]]<-subset(seurat_list[[1]], subset = DF.classifications == 'Singlet')
+  }
+  return(seurat_list)
+}
+```
+
+Follow seurat sctransform pipeline
+
+integration preparation
+
+```{r}
+integration_preparation<-function(seurat_preintegration,nfeatures=3000){
+  seurat_features <- SelectIntegrationFeatures(object.list = seurat_preintegration, nfeatures = nfeatures)
+  seurat_prepSCT <- PrepSCTIntegration(object.list = seurat_preintegration, anchor.features = seurat_features, verbose = FALSE)
+  integration_factor<-list(seurat_features,seurat_prepSCT)
+  return(integration_factor)
+}
+```
+
+
+integrate
+```{r}
+integrate_seurat<-function(integration_factor){
+  seurat_anchors <- FindIntegrationAnchors(object.list = integration_factor[[2]], normalization.method = "SCT", anchor.features = integration_factor[[1]], verbose = FALSE)
+  seurat_integrated <- IntegrateData(anchorset = seurat_anchors, normalization.method = "SCT", verbose = FALSE)
+  return(seurat_integrated)
+}
+```
+
+print preview images
+```{r}
+name = "insert_file_output_directory_here/taskname_here"
+seurat_integrated=cordblood_INTEGRATED_SCFALSE_NFEATURES3000_DIMREDUCT
+  png(filename = paste0(name,"_clustermap_umap.png"), width=500, height=500)
+p <- DimPlot(object = seurat_integrated, reduction = "umap", label = TRUE)
+CombinePlots(plots = list(p), ncol = 2)
+dev.off()
+  png(filename = paste0(name,"_overvieweapression_umap.png"), width=1200, height=900)
+FeaturePlot(object = seurat_integrated, features = c("CD34", "HBB","HBG1","HBG2","HBA1","SLC4A1","GYPA","KLF1", "BCL11A", "GATA1", "ZFPM1","MYB", "NFE4","ZBTB7A", "NR2C1", "NR2C2", "IKZF1", "MPO"), min.cutoff = "q9", cols = c("lightgrey", "blue"),reduction = "umap", pt.size = 0.5)
+dev.off()
+  png(filename = paste0(name,"_clustermap_tsne.png"), width=500, height=500)
+p <- DimPlot(object = seurat_integrated, reduction = "tsne", label = TRUE)
+CombinePlots(plots = list(p), ncol = 2)
+dev.off()
+  png(filename = paste0(name,"_overvieweapression_tsne.png"), width=1200, height=900)
+FeaturePlot(object = seurat_integrated,  features = c("CD34", "HBB","HBG1","HBG2","HBA1","SLC4A1","GYPA","KLF1", "BCL11A", "GATA1", "ZFPM1","MYB", "NFE4","ZBTB7A", "NR2C1", "NR2C2", "IKZF1", "MPO"), min.cutoff = "q9", cols = c("lightgrey", "blue"),reduction = "tsne", pt.size = 0.5)
+dev.off()
+  png(filename = paste0(name,"_clustermap_pca.png"), width=500, height=500)
+p <- DimPlot(object = seurat_integrated, reduction = "pca", label = TRUE)
+CombinePlots(plots = list(p), ncol = 2)
+dev.off()
+  png(filename = paste0(name,"_overvieweapression_pca.png"), width=1200, height=900)
+FeaturePlot(object = seurat_integrated,  features = c("CD34", "HBB","HBG1","HBG2","HBA1","SLC4A1","GYPA","KLF1", "BCL11A", "GATA1", "ZFPM1","MYB", "NFE4","ZBTB7A", "NR2C1", "NR2C2", "IKZF1", "MPO"), min.cutoff = "q9", cols = c("lightgrey", "blue"),reduction = "pca", pt.size = 0.5)
+dev.off()
+
+```
+
