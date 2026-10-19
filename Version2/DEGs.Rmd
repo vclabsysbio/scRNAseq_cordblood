@@ -1,0 +1,1684 @@
+---
+title: "CordBlood_03_DEGs"
+author: "Sarintip, Pakkanan"
+date: "2022-11-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r Load libraries}
+library (Seurat)
+library (plotly)
+library (ggplot2)
+library(tidyverse)
+```
+
+```{r Load input}
+RBC <- readRDS(file = "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/hemoglobin_containing_dataset_hardCO_edit2.rds")
+```
+
+# DEGs
+##############################################################################################################################################################
+## Hard cut-off
+##### early_high_HBB
+##### early_high_HBG
+##### int_high_HBB
+##### int_high_HBG
+##### late_high_HBB
+##### late_high_HBG
+```{r}
+DefaultAssay(RBC) <- "RNA"
+Idents(RBC) <- "hardCO"
+table(RBC@meta.data$hardCO)
+```
+
+### HBB vs HBG
+### Find DEGs by early_high_HBB compare to early_high_HBG
+```{r}
+earlyHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "early_high_HBB", ident.2 = "early_high_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(earlyHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+earlyHBBHBGhigh.markers$avg_value <- 2^(earlyHBBHBGhigh.markers$avg_log2FC)
+earlyHBBHBGhigh.markers$avg_logFC <- log(earlyHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(earlyHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_earlyHBBHBGhigh_hardCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference early_high_HBB vs early_high_HBG
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+earlyHBBHBGhigh.markers_20 <- earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(earlyHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_earlyHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+earlyHBBHBGhigh.markers_50 <- earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(earlyHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_earlyHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+### Find DEGs by int_high_HBB compare to int_high_HBG
+```{r}
+intHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "int_high_HBB", ident.2 = "int_high_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(intHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+intHBBHBGhigh.markers$avg_value <- 2^(intHBBHBGhigh.markers$avg_log2FC)
+intHBBHBGhigh.markers$avg_logFC <- log(intHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(intHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_intHBBHBGhigh_hardCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference int_high_HBB vs int_high_HBG
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+intHBBHBGhigh.markers_20 <- intHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(intHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_intHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+intHBBHBGhigh.markers_50 <- intHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(intHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_intHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+### Find DEGs by late_high_HBB compare to late_high_HBG
+```{r}
+lateHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "late_high_HBB", ident.2 = "late_high_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(lateHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+lateHBBHBGhigh.markers$avg_value <- 2^(lateHBBHBGhigh.markers$avg_log2FC)
+lateHBBHBGhigh.markers$avg_logFC <- log(lateHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(lateHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_lateHBBHBGhigh_hardCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference late_high_HBB vs late_high_HBG
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+lateHBBHBGhigh.markers_20 <- lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(lateHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_lateHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+lateHBBHBGhigh.markers_50 <- lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(lateHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_lateHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+
+### HBG vs HBB
+### Find DEGs by early_high_HBG compare to early_high_HBB
+```{r}
+earlyHBGHBBhigh.markers <- FindMarkers(RBC, ident.1 = "early_high_HBG", ident.2 = "early_high_HBB", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(earlyHBGHBBhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+earlyHBGHBBhigh.markers$avg_value <- 2^(earlyHBGHBBhigh.markers$avg_log2FC)
+earlyHBGHBBhigh.markers$avg_logFC <- log(earlyHBGHBBhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(earlyHBGHBBhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_earlyHBGHBBhigh_hardCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference early_high_HBG vs early_high_HBB
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+earlyHBGHBBhigh.markers_20 <- earlyHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(earlyHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_earlyHBGHBBhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+earlyHBGHBBhigh.markers_50 <- earlyHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(earlyHBGHBBhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_earlyHBGHBBhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+### Find DEGs by int_high_HBG compare to int_high_HBB
+```{r}
+intHBGHBBhigh.markers <- FindMarkers(RBC, ident.1 = "int_high_HBG", ident.2 = "int_high_HBB", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(intHBGHBBhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+intHBGHBBhigh.markers$avg_value <- 2^(intHBGHBBhigh.markers$avg_log2FC)
+intHBGHBBhigh.markers$avg_logFC <- log(intHBGHBBhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(intHBGHBBhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_intHBGHBBhigh_hardCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference int_high_HBG vs int_high_HBB
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+intHBGHBBhigh.markers_20 <- intHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(intHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_intHBGHBBhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+intHBGHBBhigh.markers_50 <- intHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(intHBGHBBhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_intHBGHBBhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+### Find DEGs by late_high_HBG compare to late_high_HBB
+```{r}
+lateHBGHBBhigh.markers <- FindMarkers(RBC, ident.1 = "late_high_HBG", ident.2 = "late_high_HBB", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(lateHBGHBBhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+lateHBGHBBhigh.markers$avg_value <- 2^(lateHBGHBBhigh.markers$avg_log2FC)
+lateHBGHBBhigh.markers$avg_logFC <- log(lateHBGHBBhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(lateHBGHBBhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_lateHBGHBBhigh_hardCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference late_high_HBG vs late_high_HBB
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+lateHBGHBBhigh.markers_20 <- lateHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(lateHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_lateHBGHBBhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+lateHBGHBBhigh.markers_50 <- lateHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(lateHBGHBBhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_lateHBGHBBhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+##############################################################################################################################################################
+
+##############################################################################################################################################################
+## Soft cut-off
+##### early_HBB
+##### early_HBG
+##### late_HBB
+##### late_HBG
+```{r}
+DefaultAssay(RBC) <- "RNA"
+Idents(RBC) <- "softCO"
+table(RBC@meta.data$softCO)
+```
+
+### HBB vs HBG
+### Find DEGs by early_HBB compare to early_HBG
+```{r}
+soft_earlyHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "early_HBB", ident.2 = "early_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(soft_earlyHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+soft_earlyHBBHBGhigh.markers$avg_value <- 2^(soft_earlyHBBHBGhigh.markers$avg_log2FC)
+soft_earlyHBBHBGhigh.markers$avg_logFC <- log(soft_earlyHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(soft_earlyHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_earlyHBBHBGhigh_softCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference early_HBB vs early_HBG
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+soft_earlyHBBHBGhigh.markers_20 <- soft_earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(soft_earlyHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_earlyHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+soft_earlyHBBHBGhigh.markers_50 <- soft_earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(soft_earlyHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_earlyHBBHBGhigh_softCO_50diff_minpct0.25.markers.csv")
+```
+
+### Find DEGs by late_HBB compare to late_HBG
+```{r}
+soft_lateHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "late_HBB", ident.2 = "late_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(soft_lateHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+soft_lateHBBHBGhigh.markers$avg_value <- 2^(soft_lateHBBHBGhigh.markers$avg_log2FC)
+soft_lateHBBHBGhigh.markers$avg_logFC <- log(soft_lateHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(soft_lateHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_lateHBBHBGhigh_softCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference late_HBB vs late_HBG
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+soft_lateHBBHBGhigh.markers_20 <- soft_lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(soft_lateHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_lateHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+soft_lateHBBHBGhigh.markers_50 <- soft_lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(soft_lateHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_lateHBBHBGhigh_softCO_50diff_minpct0.25.markers.csv")
+```
+
+### HBG vs HBB
+### Find DEGs by early_HBG compare to early_HBB
+```{r}
+soft_earlyHBGHBBhigh.markers <- FindMarkers(RBC, ident.1 = "early_HBG", ident.2 = "early_HBB", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(soft_earlyHBGHBBhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+soft_earlyHBGHBBhigh.markers$avg_value <- 2^(soft_earlyHBGHBBhigh.markers$avg_log2FC)
+soft_earlyHBGHBBhigh.markers$avg_logFC <- log(soft_earlyHBGHBBhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(soft_earlyHBGHBBhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_earlyHBGHBBhigh_softCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference early_HBG vs early_HBB
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+soft_earlyHBGHBBhigh.markers_20 <- soft_earlyHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(soft_earlyHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_earlyHBGHBBhigh_softCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+soft_earlyHBGHBBhigh.markers_50 <- soft_earlyHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(soft_earlyHBGHBBhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_earlyHBGHBBhigh_softCO_50diff_minpct0.25.markers.csv")
+```
+
+### Find DEGs by late_HBG compare to late_HBB
+```{r}
+soft_lateHBGHBBhigh.markers <- FindMarkers(RBC, ident.1 = "late_HBG", ident.2 = "late_HBB", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(soft_lateHBGHBBhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+soft_lateHBGHBBhigh.markers$avg_value <- 2^(soft_lateHBGHBBhigh.markers$avg_log2FC)
+soft_lateHBGHBBhigh.markers$avg_logFC <- log(soft_lateHBGHBBhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(soft_lateHBGHBBhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_lateHBGHBBhigh_softCO_minpct0.25.markers.csv")
+```
+#### 20% and 50% Difference late_HBB vs late_HBG
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+soft_lateHBGHBBhigh.markers_20 <- soft_lateHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(soft_lateHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_lateHBGHBBhigh_softCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+soft_lateHBGHBBhigh.markers_50 <- soft_lateHBGHBBhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(soft_lateHBGHBBhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_soft_lateHBGHBBhigh_softCO_50diff_minpct0.25.markers.csv")
+```
+##############################################################################################################################################################
+
+##############################################################################################################################################################
+# TF-DEGs
+```{r}
+gene_symbol <- read.delim("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/gene_symbol_table.tsv")
+#TF_table <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/DatabaseExtract_v_1.01.txt", sep = "\t")
+human_tf_db<-read_tsv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/DatabaseExtract_v_1.01.txt", col_types = list(col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character()))
+colnames(human_tf_db)<-c("ensembl_gene_id","HGNC_symbol","DBD","Is_TF","TF_assessment","Binding_mode","Motif_status","Final_Notes","Final_Comments","interpro_IDs","EntrezGene_ID","EntrezGene_Description","PDB_ID","TF_tested_by_HT-SELEX","TF _tested_by_PBM","Conditional_Binding_Requirements","Original_Comments","Vaquerizas_2009_classification","CisBP considers_it_a_TF","TFCat_classification","Is_a_GO_TF","Initial_assessment","Curator_1","Curator_2","TFclass_considers it_a_TF","Go_Evidence","Pfam_Domains_By_ENSP_ID")
+
+```
+
+## Filter TF
+
+### HBB vs HBG
+### 20% Difference
+#### Hard Cut-off
+```{r}
+TF_earlyHBBHBGhigh.markers_20 <- earlyHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_earlyHBBHBGhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_TF_earlyHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+TF_intHBBHBGhigh.markers_20 <- intHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_intHBBHBGhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_TF_intHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+#filter tf
+TF_lateHBBHBGhigh.markers_20 <- lateHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_lateHBBHBGhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_TF_lateHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+```
+#### Soft Cut-off
+```{r}
+#filter tf
+TF_soft_earlyHBBHBGhigh.markers_20 <- soft_earlyHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_soft_earlyHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_TF_soft_earlyHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+#filter tf
+TF_soft_lateHBBHBGhigh.markers_20 <- soft_lateHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_soft_lateHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_TF_soft_lateHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+```
+
+### HBG vs HBB
+### 20% Difference
+#### Hard Cut-off
+```{r}
+TF_earlyHBGHBBhigh.markers_20 <- earlyHBGHBBhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_earlyHBGHBBhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_TF_earlyHBGHBBhigh_hardCO_20diff_minpct0.25.markers.csv")
+TF_intHBGHBBhigh.markers_20 <- intHBGHBBhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_intHBGHBBhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_TF_intHBGHBBhigh_hardCO_20diff_minpct0.25.markers.csv")
+#filter tf
+TF_lateHBGHBBhigh.markers_20 <- lateHBGHBBhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_lateHBGHBBhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/new2023_TF_lateHBGHBBhigh_hardCO_20diff_minpct0.25.markers.csv")
+```
+#### Soft Cut-off
+```{r}
+#filter tf
+TF_soft_earlyHBGHBBhigh.markers_20 <- soft_earlyHBGHBBhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_soft_earlyHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_TF_soft_earlyHBGHBBhigh_softCO_20diff_minpct0.25.markers.csv")
+#filter tf
+TF_soft_lateHBGHBBhigh.markers_20 <- soft_lateHBGHBBhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_soft_lateHBGHBBhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/new2023_TF_soft_lateHBGHBBhigh_softCO_20diff_minpct0.25.markers.csv")
+```
+##############################################################################################################################################################
+
+##############################################################################################################################################################
+# Heatmap
+```{r load dataset}
+integrated_seurat <- readRDS(file = "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/hemoglobin_containing_dataset_hardCO_edit2.rds")
+```
+```{r create average expression table}
+DefaultAssay(integrated_seurat) <- "RNA"
+Idents(integrated_seurat) <- "softCO"
+
+integrated_average_expression_table <- AverageExpression(integrated_seurat, 
+                                                         assays = "RNA")
+#integrated_average_expression_table <- data.frame(integrated_average_expression_table)
+```
+```{r}
+#integrated_average_expression_table_RNA <- rownames_to_column(integrated_average_expression_table[["RNA"]])
+integrated_average_expression_table_RNA <- integrated_average_expression_table[["RNA"]]
+integrated_average_expression_table_RNA <- integrated_average_expression_table_RNA %>% data.frame() %>% rownames_to_column()
+```
+```{r}
+integrated_average_expression_table_RNA
+```
+## Soft Cut-off RNA
+### early_HBB and early_HBG
+```{r}
+library(starsExtra)
+#early_HBB vs early_HBG
+soft_earlyHBBHBGhigh.markers_20 <- rownames_to_column(soft_earlyHBBHBGhigh.markers_20, var = "gene_id")
+top10_soft_earlyHBBHBGhigh.markers_20 <- soft_earlyHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_soft_earlyHBBHBGhigh.markers_20 <- top10_soft_earlyHBBHBGhigh.markers_20$gene_id
+#early_HBG vs early_HBB
+soft_earlyHBGHBBhigh.markers_20 <- rownames_to_column(soft_earlyHBGHBBhigh.markers_20, var = "gene_id")
+top10_soft_earlyHBGHBBhigh.markers_20 <- soft_earlyHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_soft_earlyHBGHBBhigh.markers_20 <- top10_soft_earlyHBGHBBhigh.markers_20$gene_id
+```
+```{r}
+#early_HBB vs early_HBG
+top10_soft_earlyHBBHBGhigh.markers_20
+
+#early_HBG vs early_HBB
+#top10_soft_earlyHBGHBBhigh.markers_20
+rev(top10_soft_earlyHBGHBBhigh.markers_20)
+```
+```{r}
+library(fastcluster)
+#early_HBB vs early_HBG
+soft_early_HBBhigherthanHBG_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           top10_soft_earlyHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="early_HBBhigherthanHBG_allgene")
+
+soft_early_HBBhigherthanHBG_matrix <- soft_early_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+soft_early_HBBhigherthanHBG_hclust <- soft_early_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+soft_early_HBBhigherthanHBG_table_sorted <- soft_early_HBBhigherthanHBG_table[soft_early_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#early_HBG vs early_HBB
+soft_early_HBGhigherthanHBB_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_soft_earlyHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="early_HBGhigherthanHBB_allgene")
+
+soft_early_HBGhigherthanHBB_matrix <- soft_early_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+soft_early_HBGhigherthanHBB_hclust <- soft_early_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+soft_early_HBGhigherthanHBB_table_sorted <- soft_early_HBGhigherthanHBB_table[soft_early_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### late_HBB and late_HBG
+```{r}
+#late_HBB vs late_HBG
+soft_lateHBBHBGhigh.markers_20 <- rownames_to_column(soft_lateHBBHBGhigh.markers_20, var = "gene_id")
+top10_soft_lateHBBHBGhigh.markers_20 <- soft_lateHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_soft_lateHBBHBGhigh.markers_20 <- top10_soft_lateHBBHBGhigh.markers_20$gene_id
+
+#late_HBG vs late_HBB
+soft_lateHBGHBBhigh.markers_20 <- rownames_to_column(soft_lateHBGHBBhigh.markers_20, var = "gene_id")
+top10_soft_lateHBGHBBhigh.markers_20 <- soft_lateHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_soft_lateHBGHBBhigh.markers_20 <- top10_soft_lateHBGHBBhigh.markers_20$gene_id
+```
+```{r}
+#late_HBB vs late_HBG
+top10_soft_lateHBBHBGhigh.markers_20
+
+#late_HBG vs late_HBB
+#top10_soft_lateHBGHBBhigh.markers_20
+rev(top10_soft_lateHBGHBBhigh.markers_20)
+```
+```{r}
+#late_HBB vs late_HBG
+soft_late_HBBhigherthanHBG_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           top10_soft_lateHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="late_HBBhigherthanHBG_allgene")
+
+soft_late_HBBhigherthanHBG_matrix <- soft_late_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+soft_late_HBBhigherthanHBG_hclust <- soft_late_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+soft_late_HBBhigherthanHBG_table_sorted <- soft_late_HBBhigherthanHBG_table[soft_late_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#late_HBG vs late_HBB
+soft_late_HBGhigherthanHBB_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_soft_lateHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="late_HBGhigherthanHBB_allgene")
+
+soft_late_HBGhigherthanHBB_matrix <- soft_late_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+soft_late_HBGhigherthanHBB_hclust <- soft_late_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+soft_late_HBGhigherthanHBB_table_sorted <- soft_late_HBGhigherthanHBB_table[soft_late_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### join table RNA - soft cut-off
+```{r}
+all_gene_table_sorted <- soft_early_HBBhigherthanHBG_table_sorted %>% 
+  rbind.data.frame(soft_early_HBGhigherthanHBB_table_sorted) %>% 
+  rbind.data.frame(soft_late_HBBhigherthanHBG_table_sorted) %>% 
+  rbind.data.frame(soft_late_HBGhigherthanHBB_table_sorted) %>% 
+  separate("group", c("time", "direction", "type"))
+```
+
+## Soft Cut-off TF
+### early_HBB and early_HBG
+```{r}
+#early_HBB vs early_HBG
+top10_TF_soft_earlyHBBHBGhigh.markers_20 <- TF_soft_earlyHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_soft_earlyHBBHBGhigh.markers_20 <- top10_TF_soft_earlyHBBHBGhigh.markers_20$rowname
+
+#early_HBG vs early_HBB
+top10_TF_soft_earlyHBGHBBhigh.markers_20 <- TF_soft_earlyHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_soft_earlyHBGHBBhigh.markers_20 <- top10_TF_soft_earlyHBGHBBhigh.markers_20$rowname
+```
+```{r}
+#early_HBB vs early_HBG
+top10_TF_soft_earlyHBBHBGhigh.markers_20
+
+#early_HBG vs early_HBB
+#top10_TF_soft_earlyHBGHBBhigh.markers_20
+rev(top10_TF_soft_earlyHBGHBBhigh.markers_20)
+```
+```{r}
+#early_HBB vs early_HBG
+TF_soft_early_HBBhigherthanHBG_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           top10_TF_soft_earlyHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="early_HBBhigherthanHBG_allgene")
+
+TF_soft_early_HBBhigherthanHBG_matrix <- TF_soft_early_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_soft_early_HBBhigherthanHBG_hclust <- TF_soft_early_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+TF_soft_early_HBBhigherthanHBG_table_sorted <- TF_soft_early_HBBhigherthanHBG_table[TF_soft_early_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#early_HBG vs early_HBB
+TF_soft_early_HBGhigherthanHBB_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_TF_soft_earlyHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="early_HBGhigherthanHBB_allgene")
+
+TF_soft_early_HBGhigherthanHBB_matrix <- TF_soft_early_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_soft_early_HBGhigherthanHBB_hclust <- TF_soft_early_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+TF_soft_early_HBGhigherthanHBB_table_sorted <- TF_soft_early_HBGhigherthanHBB_table[TF_soft_early_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### late_HBB and late_HBG
+```{r}
+#late_HBB vs late_HBG
+top10_TF_soft_lateHBBHBGhigh.markers_20 <- TF_soft_lateHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_soft_lateHBBHBGhigh.markers_20 <- top10_TF_soft_lateHBBHBGhigh.markers_20$rowname
+
+#late_HBG vs late_HBB
+top10_TF_soft_lateHBGHBBhigh.markers_20 <- TF_soft_lateHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_soft_lateHBGHBBhigh.markers_20 <- top10_TF_soft_lateHBGHBBhigh.markers_20$rowname
+```
+```{r}
+#late_HBB vs late_HBG
+top10_TF_soft_lateHBBHBGhigh.markers_20
+
+#late_HBG vs late_HBB
+#top10_TF_soft_lateHBGHBBhigh.markers_20
+rev(top10_TF_soft_lateHBGHBBhigh.markers_20)
+```
+```{r}
+#late_HBB vs late_HBG
+TF_soft_late_HBBhigherthanHBG_table <- integrated_average_expression_table_RNA %>% 
+  filter(rowname %in% 
+           top10_TF_soft_lateHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="late_HBBhigherthanHBG_allgene")
+
+TF_soft_late_HBBhigherthanHBG_matrix <- TF_soft_late_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_soft_late_HBBhigherthanHBG_hclust <- TF_soft_late_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+TF_soft_late_HBBhigherthanHBG_table_sorted <- TF_soft_late_HBBhigherthanHBG_table[TF_soft_late_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#late_HBG vs late_HBB
+#TF_soft_late_HBGhigherthanHBB_table <- integrated_average_expression_table_RNA %>% 
+#  filter(rowname %in% 
+#           rev(top10_TF_soft_lateHBGHBBhigh.markers_20)) %>% 
+#  cbind.data.frame(group="late_HBGhigherthanHBB_allgene")
+
+#TF_soft_late_HBGhigherthanHBB_matrix <- TF_soft_late_HBGhigherthanHBB_table %>% 
+#  dplyr::select(-group) %>% 
+#  column_to_rownames() %>% 
+#  as.matrix() %>% 
+#  t %>% 
+#  scale() %>% 
+#  t %>% 
+#  as.matrix()
+
+#TF_soft_late_HBGhigherthanHBB_hclust <- TF_soft_late_HBGhigherthanHBB_matrix %>% 
+#  hclust.vector(method="ward", 
+#                metric="euclidean")
+#TF_soft_late_HBGhigherthanHBB_table_sorted <- TF_soft_late_HBGhigherthanHBB_table[TF_soft_late_HBGhigherthanHBB_hclust$order,] %>% 
+#  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+#  remove_rownames()
+```
+### join table TF - soft cut-off
+```{r}
+all_gene_table_sorted_tf <- TF_soft_early_HBBhigherthanHBG_table_sorted %>% 
+  rbind.data.frame(TF_soft_early_HBGhigherthanHBB_table_sorted) %>% 
+  rbind.data.frame(TF_soft_late_HBBhigherthanHBG_table_sorted) %>% 
+  #rbind.data.frame(TF_soft_late_HBGhigherthanHBB_table_sorted) %>% 
+  separate("group", c("time", "direction", "type"))
+```
+
+
+## Hard Cut-off RNA
+```{r create average expression table}
+DefaultAssay(integrated_seurat) <- "RNA"
+Idents(integrated_seurat) <- "hardCO"
+
+integrated_average_expression_table_hard <- AverageExpression(integrated_seurat, 
+                                                         assays = "RNA")
+#integrated_average_expression_table <- data.frame(integrated_average_expression_table)
+```
+```{r}
+#integrated_average_expression_table_RNA <- rownames_to_column(integrated_average_expression_table[["RNA"]])
+integrated_average_expression_table_hard_RNA <- integrated_average_expression_table_hard[["RNA"]]
+integrated_average_expression_table_hard_RNA <- integrated_average_expression_table_hard_RNA %>% data.frame() %>% rownames_to_column()
+integrated_average_expression_table_hard_RNA$early_HBG <- NULL
+integrated_average_expression_table_hard_RNA$early_HBB <- NULL
+integrated_average_expression_table_hard_RNA$late_HBG <- NULL
+integrated_average_expression_table_hard_RNA$late_HBB <- NULL
+```
+```{r}
+integrated_average_expression_table_hard_RNA
+```
+### early_HBB and early_HBG
+```{r}
+#early_HBB vs early_HBG
+earlyHBBHBGhigh.markers_20 <- rownames_to_column(earlyHBBHBGhigh.markers_20, var = "gene_id")
+top10_earlyHBBHBGhigh.markers_20 <- earlyHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_earlyHBBHBGhigh.markers_20 <- top10_earlyHBBHBGhigh.markers_20$gene_id
+
+#early_HBG vs early_HBB
+earlyHBGHBBhigh.markers_20 <- rownames_to_column(earlyHBGHBBhigh.markers_20, var = "gene_id")
+top10_earlyHBGHBBhigh.markers_20 <- earlyHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_earlyHBGHBBhigh.markers_20 <- top10_earlyHBGHBBhigh.markers_20$gene_id
+```
+```{r}
+#early_HBB vs early_HBG
+top10_earlyHBBHBGhigh.markers_20
+
+#early_HBG vs early_HBB
+#top10_earlyHBGHBBhigh.markers_20
+rev(top10_earlyHBGHBBhigh.markers_20)
+```
+```{r}
+#early_HBB vs early_HBG
+early_HBBhigherthanHBG_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           top10_earlyHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="early_HBBhigherthanHBG_allgene")
+
+early_HBBhigherthanHBG_matrix <- early_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+early_HBBhigherthanHBG_hclust <- early_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+early_HBBhigherthanHBG_table_sorted <- early_HBBhigherthanHBG_table[early_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#early_HBG vs early_HBB
+early_HBGhigherthanHBB_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_earlyHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="early_HBGhigherthanHBB_allgene")
+
+early_HBGhigherthanHBB_matrix <- early_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+early_HBGhigherthanHBB_hclust <- early_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+early_HBGhigherthanHBB_table_sorted <- early_HBGhigherthanHBB_table[early_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### int_HBB and int_HBG
+```{r}
+#int_HBB vs int_HBG
+intHBBHBGhigh.markers_20 <- rownames_to_column(intHBBHBGhigh.markers_20, var = "gene_id")
+top10_intHBBHBGhigh.markers_20 <- intHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_intHBBHBGhigh.markers_20 <- top10_intHBBHBGhigh.markers_20$gene_id
+
+#int_HBG vs int_HBB
+intHBGHBBhigh.markers_20 <- rownames_to_column(intHBGHBBhigh.markers_20, var = "gene_id")
+top10_intHBGHBBhigh.markers_20 <- intHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_intHBGHBBhigh.markers_20 <- top10_intHBGHBBhigh.markers_20$gene_id
+```
+```{r}
+#int_HBB vs int_HBG
+top10_intHBBHBGhigh.markers_20
+
+#int_HBG vs int_HBB
+#top10_intHBGHBBhigh.markers_20
+rev(top10_intHBGHBBhigh.markers_20)
+```
+```{r}
+#int_HBB vs int_HBG
+int_HBBhigherthanHBG_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           top10_intHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="int_HBBhigherthanHBG_allgene")
+
+int_HBBhigherthanHBG_matrix <- int_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+int_HBBhigherthanHBG_hclust <- int_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+int_HBBhigherthanHBG_table_sorted <- int_HBBhigherthanHBG_table[int_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#int_HBG vs int_HBB
+int_HBGhigherthanHBB_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_intHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="int_HBGhigherthanHBB_allgene")
+
+int_HBGhigherthanHBB_matrix <- int_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+int_HBGhigherthanHBB_hclust <- int_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+int_HBGhigherthanHBB_table_sorted <- int_HBGhigherthanHBB_table[int_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### late_HBB and late_HBG
+```{r}
+#late_HBB vs late_HBG
+lateHBBHBGhigh.markers_20 <- rownames_to_column(lateHBBHBGhigh.markers_20, var = "gene_id")
+top10_lateHBBHBGhigh.markers_20 <- lateHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_lateHBBHBGhigh.markers_20 <- top10_lateHBBHBGhigh.markers_20$gene_id
+
+#late_HBG vs late_HBB
+lateHBGHBBhigh.markers_20 <- rownames_to_column(lateHBGHBBhigh.markers_20, var = "gene_id")
+top10_lateHBGHBBhigh.markers_20 <- lateHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("gene_id")
+top10_lateHBGHBBhigh.markers_20 <- top10_lateHBGHBBhigh.markers_20$gene_id
+
+```
+```{r}
+#late_HBB vs late_HBG
+top10_lateHBBHBGhigh.markers_20
+
+#late_HBG vs late_HBB
+#top10_lateHBGHBBhigh.markers_20
+rev(top10_lateHBGHBBhigh.markers_20)
+```
+```{r}
+#late_HBB vs late_HBG
+late_HBBhigherthanHBG_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           top10_lateHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="late_HBBhigherthanHBG_allgene")
+
+late_HBBhigherthanHBG_matrix <- late_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+late_HBBhigherthanHBG_hclust <- late_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+late_HBBhigherthanHBG_table_sorted <- late_HBBhigherthanHBG_table[late_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#late_HBG vs late_HBB
+late_HBGhigherthanHBB_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_lateHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="late_HBGhigherthanHBB_allgene")
+
+late_HBGhigherthanHBB_matrix <- late_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+late_HBGhigherthanHBB_hclust <- late_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+late_HBGhigherthanHBB_table_sorted <- late_HBGhigherthanHBB_table[late_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### join table RNA - hard cut-off
+```{r}
+all_hardCO_gene_table_sorted <- early_HBBhigherthanHBG_table_sorted %>% 
+  rbind.data.frame(early_HBGhigherthanHBB_table_sorted) %>%
+  rbind.data.frame(int_HBBhigherthanHBG_table_sorted) %>% 
+  rbind.data.frame(int_HBGhigherthanHBB_table_sorted) %>% 
+  rbind.data.frame(late_HBBhigherthanHBG_table_sorted) %>% 
+  rbind.data.frame(late_HBGhigherthanHBB_table_sorted) %>% 
+  separate("group", c("time", "direction", "type"))
+```
+
+## Hard Cut-off TF
+### early_HBB and early_HBG
+```{r}
+#early_HBB vs early_HBG
+top10_TF_earlyHBBHBGhigh.markers_20 <- TF_earlyHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_earlyHBBHBGhigh.markers_20 <- top10_TF_earlyHBBHBGhigh.markers_20$rowname
+
+#early_HBG vs early_HBB
+top10_TF_earlyHBGHBBhigh.markers_20 <- TF_earlyHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_earlyHBGHBBhigh.markers_20 <- top10_TF_earlyHBGHBBhigh.markers_20$rowname
+```
+```{r}
+#early_HBB vs early_HBG
+top10_TF_earlyHBBHBGhigh.markers_20
+
+#early_HBG vs early_HBB
+#top10_TF_earlyHBGHBBhigh.markers_20
+rev(top10_TF_earlyHBGHBBhigh.markers_20)
+```
+```{r}
+#early_HBB vs early_HBG
+TF_early_HBBhigherthanHBG_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           top10_TF_earlyHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="TF_early_HBBhigherthanHBG_allgene")
+
+TF_early_HBBhigherthanHBG_matrix <- TF_early_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_early_HBBhigherthanHBG_hclust <- TF_early_HBBhigherthanHBG_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+
+TF_early_HBBhigherthanHBG_table_sorted <- TF_early_HBBhigherthanHBG_table[TF_early_HBBhigherthanHBG_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#early_HBG vs early_HBB
+TF_early_HBGhigherthanHBB_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_TF_earlyHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="TF_early_HBGhigherthanHBB_allgene")
+
+TF_early_HBGhigherthanHBB_matrix <- TF_early_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_early_HBGhigherthanHBB_hclust <- TF_early_HBGhigherthanHBB_matrix %>% 
+  hclust.vector(method="ward", 
+                metric="euclidean")
+TF_early_HBGhigherthanHBB_table_sorted <- TF_early_HBGhigherthanHBB_table[TF_early_HBGhigherthanHBB_hclust$order,] %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### int_HBB and int_HBG
+```{r}
+#int_HBB vs int_HBG
+top10_TF_intHBBHBGhigh.markers_20 <- TF_intHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_intHBBHBGhigh.markers_20 <- top10_TF_intHBBHBGhigh.markers_20$rowname
+
+#int_HBG vs int_HBB
+top10_TF_intHBGHBBhigh.markers_20 <- TF_intHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_intHBGHBBhigh.markers_20 <- top10_TF_intHBGHBBhigh.markers_20$rowname
+
+```
+```{r}
+#int_HBB vs int_HBG
+top10_TF_intHBBHBGhigh.markers_20
+
+#int_HBG vs int_HBB
+#top10_TF_intHBGHBBhigh.markers_20
+rev(top10_TF_intHBGHBBhigh.markers_20)
+```
+```{r}
+#int_HBB vs int_HBG
+TF_int_HBBhigherthanHBG_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           top10_TF_intHBBHBGhigh.markers_20) %>% 
+  cbind.data.frame(group="TF_int_HBBhigherthanHBG_allgene")
+
+TF_int_HBBhigherthanHBG_matrix <- TF_int_HBBhigherthanHBG_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_int_HBBhigherthanHBG_table_sorted <- TF_int_HBBhigherthanHBG_table %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+```{r}
+#int_HBG vs int_HBB
+TF_int_HBGhigherthanHBB_table <- integrated_average_expression_table_hard_RNA %>% 
+  filter(rowname %in% 
+           rev(top10_TF_intHBGHBBhigh.markers_20)) %>% 
+  cbind.data.frame(group="TF_int_HBGhigherthanHBB_allgene")
+
+TF_int_HBGhigherthanHBB_matrix <- TF_int_HBGhigherthanHBB_table %>% 
+  dplyr::select(-group) %>% 
+  column_to_rownames() %>% 
+  as.matrix() %>% 
+  t %>% 
+  scale() %>% 
+  t %>% 
+  as.matrix()
+
+TF_int_HBGhigherthanHBB_table_sorted <- TF_int_HBGhigherthanHBB_table %>% 
+  cbind.data.frame(idx=seq(1:nrow(.))) %>% 
+  remove_rownames()
+```
+### late_HBB and late_HBG
+```{r}
+#late_HBB vs late_HBG
+top10_TF_lateHBBHBGhigh.markers_20 <- TF_lateHBBHBGhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_lateHBBHBGhigh.markers_20 <- top10_TF_lateHBBHBGhigh.markers_20$rowname
+
+#late_HBG vs late_HBB
+top10_TF_lateHBGHBBhigh.markers_20 <- TF_lateHBGHBBhigh.markers_20 %>% slice_max(n = 10, order_by = avg_logFC) #%>%  extract2("rowname")
+top10_TF_lateHBGHBBhigh.markers_20 <- top10_TF_lateHBGHBBhigh.markers_20$rowname
+
+```
+```{r}
+#late_HBB vs late_HBG
+top10_TF_lateHBBHBGhigh.markers_20
+
+#late_HBG vs late_HBB
+#top10_TF_lateHBGHBBhigh.markers_20
+rev(top10_TF_lateHBGHBBhigh.markers_20)
+```
+### join table TF - hard cut-off
+```{r}
+all_hardCO_gene_table_sorted_tf <- TF_early_HBBhigherthanHBG_table_sorted %>% 
+  rbind.data.frame(TF_early_HBGhigherthanHBB_table_sorted) %>%
+  rbind.data.frame(TF_int_HBBhigherthanHBG_table_sorted) %>% 
+  rbind.data.frame(TF_int_HBGhigherthanHBB_table_sorted) %>% 
+  separate("group", c("TF", "time", "direction", "type"))
+```
+
+
+
+
+
+### lazy heatmap function
+```{r}
+make_lazyheatmap2<-function(matrix_or_interest,heatmap_name,name){Heatmap(matrix_or_interest, 
+                        #heatmap internal name
+                        name=name,
+                        #column ordering and dendogram config
+                        show_column_dend = FALSE,
+                        cluster_columns = FALSE,
+                        #row ordering and dendrogram config
+                        show_row_dend = FALSE, 
+                        cluster_rows = FALSE,
+                        #title config
+                        column_title = heatmap_name,
+                        #row and column name config
+                        show_row_names = TRUE, 
+                        show_column_names = TRUE,
+                        column_names_side = "top",
+                        row_names_side = "left", 
+                        row_names_gp = gpar(fontsize = 12),
+                        #color scale config
+                        col = colorRamp2(c(-1.5,0,1.5), c("blue","black","yellow")),
+                        #borderconfig
+                        #rect_gp = gpar(col = "white", lwd = 2),
+                        #split=5
+                        #set legend
+              
+                        #split=splitter,
+                        use_raster = FALSE,
+                        #annotation
+                        #top_annotation = column_annotation_object
+                        column_names_rot = 45,
+                        width = unit(40, "mm")
+                        )
+  
+}
+```
+
+## Soft Cut-off
+#### Heatmap RNA early_HBB vs early_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_gene_table_sorted %>% 
+                                    filter(time=="early") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    #as.numeric() %>%
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n differentially expressed genes (DEGs)\n between the 'early' HBB- or HBG-high groups", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/13-1_soft_early_HBBvsHBG.png", width = 5, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_gene_table_sorted %>% 
+                              filter(time=="early") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>%
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"),
+                            name="direction",
+                            col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+# 3. Close the file
+dev.off()
+```
+#### Heatmap late_HBB vs late_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_gene_table_sorted %>% 
+                                    filter(time=="late") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    #as.numeric() %>%
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n differentially expressed genes (DEGs)\n between the 'late' HBB- or HBG-high groups", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/13-2_soft_late_HBBvsHBG.png", width = 5, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_gene_table_sorted %>% 
+                              filter(time=="late") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>%
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"),
+                            name="direction",
+                            col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+# 3. Close the file
+dev.off()
+```
+
+#### Heatmap TF early_HBB vs early_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_gene_table_sorted_tf %>% 
+                                    filter(time=="early") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n transciption factors (TFs)\n between the 'early' HBB- or HBG-high groups\n (soft cut-off)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/14-1_soft_early_HBBvsHBG_TF.png", width = 5, height = 3.8, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_gene_table_sorted_tf %>% 
+                              filter(time=="early") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"), 
+                            name="direction", col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+dev.off()
+```
+#### Heatmap TF late_HBB vs late_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_gene_table_sorted_tf %>% 
+                                    filter(time=="late") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n transciption factors (TFs)\n between the 'late' HBB- or HBG-high groups\n (soft cut-off)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/14-2_soft_late_HBBvsHBG_TF.png", width = 5, height = 3.8, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_gene_table_sorted_tf %>% 
+                              filter(time=="late") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG"), name="direction", col=c("black"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+dev.off()
+```
+
+## Hard Cut-off
+#### Heatmap RNA early_HBB vs early_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_hardCO_gene_table_sorted %>% 
+                                    filter(time=="early") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    #as.numeric() %>%
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n differentially expressed genes (DEGs)\n between the 'early' HBB- or HBG-high groups\n (hard cutoff)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/15-1_hard_early_HBBvsHBG.png", width = 5, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_hardCO_gene_table_sorted %>% 
+                              filter(time=="early") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>%
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"),
+                            name="direction",
+                            col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+# 3. Close the file
+dev.off()
+```
+#### Heatmap RNA int_HBB vs int_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_hardCO_gene_table_sorted %>% 
+                                    filter(time=="int") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    #as.numeric() %>%
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n differentially expressed genes (DEGs)\n between the 'intermediate' HBB- or HBG-high groups\n (hard cutoff)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/15-2_hard_int_HBBvsHBG.png", width = 5, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_hardCO_gene_table_sorted %>% 
+                              filter(time=="int") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>%
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"),
+                            name="direction",
+                            col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+# 3. Close the file
+dev.off()
+```
+## Hard Cut-off
+#### Heatmap RNA late_HBB vs late_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_hardCO_gene_table_sorted %>% 
+                                    filter(time=="late") %>% 
+                                    dplyr::select(-direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    #as.numeric() %>%
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n differentially expressed genes (DEGs)\n between the 'late' HBB- or HBG-high groups\n (hard cutoff)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/15-3_hard_late_HBBvsHBG.png", width = 5, height = 5.5, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_hardCO_gene_table_sorted %>% 
+                              filter(time=="late") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>%
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"),
+                            name="direction",
+                            col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+# 3. Close the file
+dev.off()
+```
+#### Heatmap TF early_HBB vs early_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_hardCO_gene_table_sorted_tf %>% 
+                                    filter(time=="early") %>% 
+                                    dplyr::select(-TF, -direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n transciption factors (TFs)\n between the 'early' HBB- or HBG-high groups\n (hard cut-off)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/16-1_hard_early_HBBvsHBG_TF.png", width = 5, height = 5.3, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_hardCO_gene_table_sorted_tf %>% 
+                              filter(time=="early") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"), 
+                            name="direction", col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+dev.off()
+```
+#### Heatmap TF int_HBB vs int_HBG
+```{r}
+temp_heatmap <- make_lazyheatmap2(matrix_or_interest = all_hardCO_gene_table_sorted_tf %>% 
+                                    filter(time=="int") %>% 
+                                    dplyr::select(-TF, -direction, -time, -type, -idx) %>% 
+                                    column_to_rownames() %>% 
+                                    as.matrix() %>% 
+                                    t %>% 
+                                    scale() %>% 
+                                    t %>% 
+                                    as.matrix(), 
+                                  "Relative average transcription levels of\n transciption factors (TFs)\n between the 'intermediate' HBB- or HBG-high groups\n (hard cut-off)", 
+                                  name="z-score")
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/16-2_hard_int_HBBvsHBG_TF.png", width = 5, height = 4, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+draw(temp_heatmap + Heatmap(all_hardCO_gene_table_sorted_tf %>% 
+                              filter(time=="int") %>% 
+                              dplyr::select(direction) %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBBhigherthanHBG", replacement = "HBB > HBG") %>% 
+                              mutate_if(is.character,
+                                        str_replace_all, pattern = "HBGhigherthanHBB", replacement = "HBG > HBB"), 
+                            name="direction", col=c("black", "grey"), 
+                            width = unit(5, "mm")),
+     heatmap_legend_side="right",
+     padding = unit(c(5, 3, 3, 3), "mm")
+     )
+dev.off()
+```
+##############################################################################################################################################################
+
+##############################################################################################################################################################
+# UpSetR
+## 20Diff_HBBhigherthanHBG
+```{r}
+soft_earlyHBBHBGhigh.markers_20_vector <- soft_earlyHBBHBGhigh.markers_20$gene_id
+soft_lateHBBHBGhigh.markers_20_vector <- soft_lateHBBHBGhigh.markers_20$gene_id
+
+earlyHBBHBGhigh.markers_20_vector <- earlyHBBHBGhigh.markers_20$gene_id
+intHBBHBGhigh.markers_20_vector <- intHBBHBGhigh.markers_20$gene_id
+lateHBBHBGhigh.markers_20_vector <- lateHBBHBGhigh.markers_20$gene_id
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=soft_earlyHBBHBGhigh.markers_20_vector,
+  late_HBB_vs_HBG=soft_lateHBBHBGhigh.markers_20_vector,
+  early_HardCO=earlyHBBHBGhigh.markers_20_vector,
+  int_HardCO=intHBBHBGhigh.markers_20_vector,
+  late_HardCO=lateHBBHBGhigh.markers_20_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/12-1_UpSetR_20Diff_HBBhigherthanHBG.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+## 20Diff_HBGhigherthanHBB
+```{r}
+soft_earlyHBGHBBhigh.markers_20_vector <- soft_earlyHBGHBBhigh.markers_20$gene_id
+soft_lateHBGHBBhigh.markers_20_vector <- soft_lateHBGHBBhigh.markers_20$gene_id
+
+earlyHBGHBBhigh.markers_20_vector <- earlyHBGHBBhigh.markers_20$gene_id
+intHBGHBBhigh.markers_20_vector <- intHBGHBBhigh.markers_20$gene_id
+lateHBGHBBhigh.markers_20_vector <- lateHBGHBBhigh.markers_20$gene_id
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=soft_earlyHBGHBBhigh.markers_20_vector,
+  late_HBB_vs_HBG=soft_lateHBGHBBhigh.markers_20_vector,
+  early_HardCO=earlyHBGHBBhigh.markers_20_vector,
+  int_HardCO=intHBGHBBhigh.markers_20_vector,
+  late_HardCO=lateHBGHBBhigh.markers_20_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/12-2_UpSetR_20Diff_HBGhigherthanHBB.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+
+## 20Diff_HBBhigherthanHBG TF
+```{r}
+TF_soft_earlyHBBHBGhigh.markers_20_vector <- TF_soft_earlyHBBHBGhigh.markers_20$rowname
+TF_soft_lateHBBHBGhigh.markers_20_vector <- TF_soft_lateHBBHBGhigh.markers_20$rowname
+
+TF_earlyHBBHBGhigh.markers_20_vector <- TF_earlyHBBHBGhigh.markers_20$rowname
+TF_intHBBHBGhigh.markers_20_vector <- TF_intHBBHBGhigh.markers_20$rowname
+TF_lateHBBHBGhigh.markers_20_vector <- TF_lateHBBHBGhigh.markers_20$rowname
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=TF_soft_earlyHBBHBGhigh.markers_20_vector,
+  late_HBB_vs_HBG=TF_soft_lateHBBHBGhigh.markers_20_vector,
+  early_HardCO=TF_earlyHBBHBGhigh.markers_20_vector,
+  int_HardCO=TF_intHBBHBGhigh.markers_20_vector,
+  late_HardCO=TF_lateHBBHBGhigh.markers_20_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/12-3_UpSetR_20Diff_TF_HBBhigherthanHBG.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+## 20Diff_HBGhigherthanHBB TF
+```{r}
+TF_soft_earlyHBGHBBhigh.markers_20_vector <- TF_soft_earlyHBGHBBhigh.markers_20$rowname
+TF_soft_lateHBGHBBhigh.markers_20_vector <- TF_soft_lateHBGHBBhigh.markers_20$rowname
+
+TF_earlyHBGHBBhigh.markers_20_vector <- TF_earlyHBGHBBhigh.markers_20$rowname
+TF_intHBGHBBhigh.markers_20_vector <- TF_intHBGHBBhigh.markers_20$rowname
+TF_lateHBGHBBhigh.markers_20_vector <- TF_lateHBGHBBhigh.markers_20$rowname
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=TF_soft_earlyHBGHBBhigh.markers_20_vector,
+  late_HBB_vs_HBG=TF_soft_lateHBGHBBhigh.markers_20_vector,
+  early_HardCO=TF_earlyHBGHBBhigh.markers_20_vector,
+  int_HardCO=TF_intHBGHBBhigh.markers_20_vector,
+  late_HardCO=TF_lateHBGHBBhigh.markers_20_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/12-4_UpSetR_20Diff_TF_HBGhigherthanHBB.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+
+## 50Diff_HBBhigherthanHBG
+```{r}
+soft_earlyHBBHBGhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/soft_earlyHBBHBGhigh_softCO_50diff_minpct0.25.markers.csv")
+soft_lateHBBHBGhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/soft_lateHBBHBGhigh_softCO_50diff_minpct0.25.markers.csv")
+earlyHBBHBGhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/earlyHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+intHBBHBGhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/intHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+lateHBBHBGhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/lateHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+```{r}
+soft_earlyHBBHBGhigh.markers_50_vector <- soft_earlyHBBHBGhigh.markers_50$X
+soft_lateHBBHBGhigh.markers_50_vector <- soft_lateHBBHBGhigh.markers_50$X
+
+earlyHBBHBGhigh.markers_50_vector <- earlyHBBHBGhigh.markers_50$X
+intHBBHBGhigh.markers_50_vector <- intHBBHBGhigh.markers_50$X
+lateHBBHBGhigh.markers_50_vector <- lateHBBHBGhigh.markers_50$X
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=soft_earlyHBBHBGhigh.markers_50_vector,
+  late_HBB_vs_HBG=soft_lateHBBHBGhigh.markers_50_vector,
+  early_HardCO=earlyHBBHBGhigh.markers_50_vector,
+  int_HardCO=intHBBHBGhigh.markers_50_vector,
+  late_HardCO=lateHBBHBGhigh.markers_50_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/12-5_UpSetR_50Diff_HBBhigherthanHBG.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+## 50Diff_HBGhigherthanHBB
+```{r}
+soft_earlyHBGHBBhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/soft_earlyHBGHBBhigh_softCO_50diff_minpct0.25.markers.csv")
+soft_lateHBGHBBhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/soft_lateHBGHBBhigh_softCO_50diff_minpct0.25.markers.csv")
+earlyHBGHBBhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/earlyHBGHBBhigh_hardCO_50diff_minpct0.25.markers.csv")
+intHBGHBBhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/intHBGHBBhigh_hardCO_50diff_minpct0.25.markers.csv")
+lateHBGHBBhigh.markers_50 <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/lateHBGHBBhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+```{r}
+soft_earlyHBGHBBhigh.markers_50_vector <- soft_earlyHBGHBBhigh.markers_50$X
+soft_lateHBGHBBhigh.markers_50_vector <- soft_lateHBGHBBhigh.markers_50$X
+
+earlyHBGHBBhigh.markers_50_vector <- earlyHBGHBBhigh.markers_50$X
+intHBGHBBhigh.markers_50_vector <- intHBGHBBhigh.markers_50$X
+lateHBGHBBhigh.markers_50_vector <- lateHBGHBBhigh.markers_50$X
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=soft_earlyHBGHBBhigh.markers_50_vector,
+  late_HBB_vs_HBG=soft_lateHBGHBBhigh.markers_50_vector,
+  early_HardCO=earlyHBGHBBhigh.markers_50_vector,
+  int_HardCO=intHBGHBBhigh.markers_50_vector,
+  late_HardCO=lateHBGHBBhigh.markers_50_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/12-6_UpSetR_50Diff_HBGhigherthanHBB.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+
+```{r}
+sessionInfo()
+```
+

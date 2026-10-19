@@ -1,0 +1,525 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library (Seurat)
+library (plotly)
+library (ggplot2)
+library(tidyverse)
+```
+
+```{r}
+RBC <- readRDS("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset.rds")
+```
+
+```{r}
+#move soft cutoff to metadata
+RBC$softCO <- Idents(RBC)
+```
+
+```{r}
+#classify cell stages based on globin expression
+
+#early
+early_HBB_high_Seu <- WhichCells(object = RBC, expression = HBA1 > 3 & HBA1 < 3.5 & HBB > 5 & HBG2 < 4)
+early_HBG_high_Seu <- WhichCells(object = RBC, expression = HBA1 > 3 & HBA1 < 3.5 & HBB < 5 & HBG2 > 6)
+
+#intermediate
+int_HBB_high_Seu <- WhichCells(object = RBC, expression = HBA1 > 4 & HBA1 < 4.5 & HBB > 3.5 & HBG2 <4)
+int_HBG_high_Seu <- WhichCells(object = RBC, expression = HBA1 > 4 & HBA1 < 4.5 & HBB < 3.5 & HBG2 >6)
+
+#late
+late_HBB_high_Seu <- WhichCells(object = RBC, expression = HBA1 > 6.25 & HBA1 < 6.75 & HBB > 5.5 & HBG2 <4.5)
+late_HBG_high_Seu <- WhichCells(object = RBC, expression = HBA1 > 6.25 & HBA1 < 6.75 & HBB < 5.5 & HBG2 >7)
+```
+
+```{r}
+#Rename clusters
+#early
+Idents(object = RBC, cells = early_HBB_high_Seu) <- "early_high_HBB"
+Idents(object = RBC, cells = early_HBG_high_Seu) <- "early_high_HBG"
+
+#intermediate
+Idents(object = RBC, cells = int_HBB_high_Seu) <- "int_high_HBB"
+Idents(object = RBC, cells = int_HBG_high_Seu) <- "int_high_HBG"
+#late
+Idents(object = RBC, cells = late_HBB_high_Seu) <- "late_high_HBB"
+Idents(object = RBC, cells = late_HBG_high_Seu) <- "late_high_HBG"
+```
+
+```{r}
+#Keep idents in HardCO slot
+RBC@meta.data$hardCO <- Idents(RBC)
+```
+
+```{r}
+#Create stage and HB metadata
+early <- WhichCells(object = RBC,idents = c("early_high_HBB", "early_high_HBG"))
+int <- WhichCells(object = RBC,idents = c("int_high_HBB", "int_high_HBG"))
+late <- WhichCells(object = RBC,idents = c("late_high_HBB", "late_high_HBG"))
+
+Idents(RBC, cells = early) <- "early"
+Idents(RBC, cells = int) <- "int"
+Idents(RBC, cells = late) <- "late"
+RBC@meta.data$stage <- Idents(RBC)
+
+#Swich back to Hard CO
+Idents(RBC) <- RBC@meta.data$hardCO
+HBB_High <- WhichCells(object = RBC,idents = c("early_high_HBB", "int_high_HBB", "late_high_HBB"))
+HBG_High <- WhichCells(object = RBC,idents = c("early_high_HBG", "int_high_HBG", "late_high_HBG"))
+Idents(RBC, cells = HBB_High) <- "HBB_High"
+Idents(RBC, cells = HBG_High) <- "HBG_High"
+
+RBC@meta.data$HB <- Idents(RBC)
+
+#Swich back to Hard CO
+Idents(RBC) <- RBC@meta.data$hardCO
+```
+
+```{r}
+Idents(RBC) <- "HB"
+table(RBC@active.ident)
+RBC <- RenameIdents(RBC,
+                    'HBG_High' = 'HBG_high',
+                    'HBB_High' = 'HBB_high')
+levels(RBC)
+RBC@meta.data$HB <- Idents(RBC)
+```
+
+```{r}
+table(RBC@meta.data$stage)
+table(RBC@meta.data$hardCO)
+table(RBC@meta.data$HB)
+```
+```{r}
+RBC@meta.data$stage <- factor(RBC@meta.data$stage,
+                         levels = c("early", "int", "late",       
+                                    "early_HBG", "early_HBB", "late_HBG", "late_HBB"))
+
+RBC@meta.data$hardCO <- factor(RBC@meta.data$hardCO,
+                         levels = c("early_high_HBG", "early_high_HBB", 
+                                    "int_high_HBG", "int_high_HBB",
+                                    "late_high_HBG", "late_high_HBB",
+                                    "early_HBG", "late_HBG", "early_HBB", "late_HBB"))
+```
+
+```{r}
+Idents(RBC) <- "hardCO"
+#Plot violin plot for transcription factor of interest
+plot1 <- VlnPlot(object = RBC, idents = c("early_high_HBB", "early_high_HBG", "int_high_HBB", "int_high_HBG", "late_high_HBB", "late_high_HBG"), features = c("MTF2","NME2", "YBX3", "ETS2","DNMT1"), pt = 0.1, group.by = "stage", split.by = "HB", slot = "data")
+```
+```{r}
+p_legend <- VlnPlot(object = RBC, idents = c("early_high_HBB", "early_high_HBG", "int_high_HBB", "int_high_HBG", "late_high_HBB", "late_high_HBG"), features = c("MTF2"), pt = 0.5, group.by = "stage", split.by = "HB", slot = "data")
+```
+
+```{r}
+library(ggplot2) 
+library(grid)
+library(gridExtra) 
+library(cowplot)
+# Using the cowplot package
+legend <- cowplot::get_legend(p_legend)
+
+grid.newpage()
+grid.draw(legend)
+```
+```{r}
+plot_grid(plot1, legend, ncol = 2, rel_widths = c(0.8,0.2))
+```
+
+```{r}
+saveRDS(RBC, file = "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset_hardCO.rds")
+```
+
+
+
+# P'Aom - 20230221
+```{r}
+RBC <- readRDS(file = "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/hemoglobin_containing_dataset_hardCO_edit.rds")
+```
+```{r}
+table(RBC@meta.data$stage)
+table(RBC@meta.data$hardCO)
+table(RBC@meta.data$HB)
+```
+```{r}
+Idents(RBC) <- "HB"
+table(RBC@active.ident)
+RBC <- RenameIdents(RBC,
+                    'HBG_High' = 'HBG_high',
+                    'HBB_High' = 'HBB_high')
+levels(RBC)
+RBC@meta.data$HB <- Idents(RBC)
+table(RBC@meta.data$HB)
+```
+```{r}
+Idents(RBC) <- "stage"
+table(RBC@active.ident)
+RBC <- RenameIdents(RBC,
+                    'Early' = 'early',
+                    'Int' = 'int',
+                    'Late' = 'late')
+levels(RBC)
+RBC@meta.data$stage <- Idents(RBC)
+table(RBC@meta.data$stage)
+```
+  Late_High_HBB   Int_High_HBG   Int_High_HBB Early_High_HBG Early_High_HBB
+```{r}
+Idents(RBC) <- "hardCO"
+table(RBC@active.ident)
+RBC <- RenameIdents(RBC,
+                    'Late_High_HBG' = 'late_high_HBG',
+                    'Late_High_HBB' = 'late_high_HBB',
+                    'Int_High_HBG' = 'int_high_HBG',
+                    'Int_High_HBB' = 'int_high_HBB',
+                    'Early_High_HBG' = 'early_high_HBG',
+                    'Early_High_HBB' = 'early_high_HBB')
+levels(RBC)
+RBC@meta.data$hardCO <- Idents(RBC)
+table(RBC@meta.data$hardCO)
+```
+
+```{r}
+RBC@meta.data$stage <- factor(RBC@meta.data$stage,
+                         levels = c("early", "int", "late"))
+
+RBC@meta.data$hardCO <- factor(RBC@meta.data$hardCO,
+                         levels = c("early_high_HBG", "early_high_HBB", 
+                                    "int_high_HBG", "int_high_HBB",
+                                    "late_high_HBG", "late_high_HBB",
+                                    "early_HBG", "late_HBG", "early_HBB", "late_HBB"))
+```
+
+```{r}
+Idents(RBC) <- "hardCO"
+#Plot violin plot for transcription factor of interest
+plot1 <- VlnPlot(object = RBC, idents = c("early_high_HBB", "early_high_HBG", "int_high_HBB", "int_high_HBG", "late_high_HBB", "late_high_HBG"), features = c("MTF2","NME2", "YBX3", "ETS2","DNMT1", "GYPA"), pt = 0.1, group.by = "stage", split.by = "HB", slot = "data")
+```
+```{r}
+p_legend <- VlnPlot(object = RBC, idents = c("early_high_HBB", "early_high_HBG", "int_high_HBB", "int_high_HBG", "late_high_HBB", "late_high_HBG"), features = c("MTF2"), pt = 0.5, group.by = "stage", split.by = "HB", slot = "data")
+```
+
+```{r}
+library(ggplot2) 
+library(grid)
+library(gridExtra) 
+library(cowplot)
+# Using the cowplot package
+legend <- cowplot::get_legend(p_legend)
+
+grid.newpage()
+grid.draw(legend)
+```
+```{r fig.height=5, fig.width=8}
+plot_grid(plot1, legend, ncol = 2, rel_widths = c(0.8,0.2))
+```
+
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/11_TF_RBC_VlnPlot.png", width = 8, height = 5, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+plot_grid(plot1, legend, ncol = 2, rel_widths = c(0.8,0.2))
+# 3. Close the file
+dev.off()
+```
+```{r}
+table(RBC$hardCO)
+```
+
+
+```{r}
+DefaultAssay(RBC) <- "RNA"
+#"early_high_HBB", "early_high_HBG", "int_high_HBB", "int_high_HBG", "late_high_HBB", "late_high_HBG"
+Idents(RBC) <- "hardCO"
+Early <- subset(x = RBC, idents = c("early_high_HBB", "early_high_HBG"), invert = TRUE)
+Idents(Early) <- "HB"
+Early_plot <- VlnPlot(Early, features = c("SLC4A1", "HBA1", "HBB", "HBG2"), idents = c("HBG_high", "HBB_high"), split.by = "HB", ncol = 4)
+
+Intermediate <- subset(x = RBC, idents = c("int_high_HBB", "int_high_HBG"), invert = TRUE)
+Idents(Intermediate) <- "HB"
+Intermediate_plot <- VlnPlot(Intermediate, features = c("SLC4A1", "HBA1", "HBB", "HBG2"), idents = c("HBG_high", "HBB_high"), split.by = "HB", ncol = 4)
+
+Late <- subset(x = RBC, idents = c("late_high_HBB", "late_high_HBG"), invert = TRUE)
+Idents(Late) <- "HB"
+Late_plot <- VlnPlot(Late, features = c("SLC4A1", "HBA1", "HBB", "HBG2"), idents = c("HBG_high", "HBB_high"), split.by = "HB", ncol = 4)
+```
+```{r}
+Early_text <- ggplot() +                      # Draw ggplot2 plot with text only
+  annotate("text",
+           x = 1,
+           y = 1,
+           size = 5,
+           fontface = "bold",
+           label = "Early", 
+           angle='90') + 
+  theme_void()
+
+Int_text <- ggplot() +                      # Draw ggplot2 plot with text only
+  annotate("text",
+           x = 1,
+           y = 1,
+           size = 5,
+           fontface = "bold",
+           label = "Intermediate", 
+           angle='90') + 
+  theme_void()
+
+Late_text <- ggplot() +                      # Draw ggplot2 plot with text only
+  annotate("text",
+           x = 1,
+           y = 1,
+           size = 5,
+           fontface = "bold",
+           label = "Late", 
+           angle='90') + 
+  theme_void()
+```
+```{r}
+plot_grid(Early_text, Early_plot, ncol = 2, rel_widths = c(0.05, 0.95))
+```
+
+```{r fig.height=10, fig.width=10}
+plot_grid(Early_text, Early_plot, 
+          Int_text, Intermediate_plot, 
+          Late_text, Late_plot, 
+          ncol = 2,
+          rel_widths = c(0.05, 0.95, 0.05, 0.95, 0.05, 0.95))
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/09-2_RBC_VlnPlot_HBGHBB.png", width = 8, height = 8, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+plot_grid(Early_text, Early_plot, 
+          Int_text, Intermediate_plot, 
+          Late_text, Late_plot, 
+          ncol = 2,
+          rel_widths = c(0.05, 0.95, 0.05, 0.95, 0.05, 0.95))
+# 3. Close the file
+dev.off()
+```
+```{r}
+DefaultAssay(RBC) <- "RNA"
+Idents(RBC) <- "softCO"
+FeaturePlot(RBC, feature = "HBA1", label = TRUE)
+```
+```{r}
+# 1. Open jpeg file
+png("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/Figures/17-3_RBC_FeaturePlot_HBA1.png", width = 6, height = 5, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+FeaturePlot(RBC, feature = "HBA1", label = TRUE) + theme(#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+DefaultAssay(RBC) <- "RNA"
+Idents(RBC) <- "hardCO"
+table(RBC@meta.data$hardCO)
+```
+
+```{r}
+#Find DEG by early_high_HBB compare to early_high_HBG
+earlyHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "early_high_HBB", ident.2 = "early_high_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(earlyHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+earlyHBBHBGhigh.markers$avg_value <- 2^(earlyHBBHBGhigh.markers$avg_log2FC)
+earlyHBBHBGhigh.markers$avg_logFC <- log(earlyHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(earlyHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_earlyHBBHBGhigh_hardCO_minpct0.25.markers.csv")
+```
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+earlyHBBHBGhigh.markers_20 <- earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(earlyHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_earlyHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+earlyHBBHBGhigh.markers_50 <- earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(earlyHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_earlyHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+```{r}
+#Find DEG by int_high_HBB compare to int_high_HBG
+intHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "int_high_HBB", ident.2 = "int_high_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(intHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+intHBBHBGhigh.markers$avg_value <- 2^(intHBBHBGhigh.markers$avg_log2FC)
+intHBBHBGhigh.markers$avg_logFC <- log(intHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(intHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_intHBBHBGhigh_hardCO_minpct0.25.markers.csv")
+```
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+intHBBHBGhigh.markers_20 <- intHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(intHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_intHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+intHBBHBGhigh.markers_50 <- intHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(intHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_intHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+```{r}
+#Find DEG by late_high_HBB compare to late_high_HBG
+lateHBBHBGhigh.markers <- FindMarkers(RBC, ident.1 = "late_high_HBB", ident.2 = "late_high_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(lateHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+lateHBBHBGhigh.markers$avg_value <- 2^(lateHBBHBGhigh.markers$avg_log2FC)
+lateHBBHBGhigh.markers$avg_logFC <- log(lateHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(lateHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_lateHBBHBGhigh_hardCO_minpct0.25.markers.csv")
+```
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+lateHBBHBGhigh.markers_20 <- lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(lateHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_lateHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+lateHBBHBGhigh.markers_50 <- lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(lateHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_lateHBBHBGhigh_hardCO_50diff_minpct0.25.markers.csv")
+```
+
+########## Soft Cut-off ##########
+```{r}
+RBC_plot <- RBC
+```
+```{r}
+DefaultAssay(RBC_plot) <- "RNA"
+Idents(RBC_plot) <- "softCO"
+table(RBC_plot@meta.data$softCO)
+```
+```{r}
+#Find DEG by early_HBB compare to early_HBG
+soft_earlyHBBHBGhigh.markers <- FindMarkers(RBC_plot, ident.1 = "early_HBB", ident.2 = "early_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(soft_earlyHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+soft_earlyHBBHBGhigh.markers$avg_value <- 2^(soft_earlyHBBHBGhigh.markers$avg_log2FC)
+soft_earlyHBBHBGhigh.markers$avg_logFC <- log(soft_earlyHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(soft_earlyHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_soft_earlyHBBHBGhigh_softCO_minpct0.25.markers.csv")
+```
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+soft_earlyHBBHBGhigh.markers_20 <- soft_earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(soft_earlyHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_soft_earlyHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+soft_earlyHBBHBGhigh.markers_50 <- soft_earlyHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(soft_earlyHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_soft_earlyHBBHBGhigh_softCO_50diff_minpct0.25.markers.csv")
+```
+
+```{r}
+#Find DEG by late_HBB compare to late_HBG
+soft_lateHBBHBGhigh.markers <- FindMarkers(RBC_plot, ident.1 = "late_HBB", ident.2 = "late_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(soft_lateHBBHBGhigh.markers, n = 10)
+
+#Convert avg_log2FC to avg_logFC
+soft_lateHBBHBGhigh.markers$avg_value <- 2^(soft_lateHBBHBGhigh.markers$avg_log2FC)
+soft_lateHBBHBGhigh.markers$avg_logFC <- log(soft_lateHBBHBGhigh.markers$avg_value, base = exp(1))
+
+#Save table
+write.csv(soft_lateHBBHBGhigh.markers, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_soft_lateHBBHBGhigh_softCO_minpct0.25.markers.csv")
+```
+```{r}
+#20% Difference
+log1.2 <- log(1.2, base = exp(1))
+soft_lateHBBHBGhigh.markers_20 <- soft_lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.2)
+write.csv(soft_lateHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_soft_lateHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+
+#50% Difference
+log1.5 <- log(1.5, base = exp(1))
+soft_lateHBBHBGhigh.markers_50 <- soft_lateHBBHBGhigh.markers %>% filter(p_val_adj<0.05) %>% arrange(avg_logFC) %>% filter(avg_logFC>log1.5)
+write.csv(soft_lateHBBHBGhigh.markers_50, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_soft_lateHBBHBGhigh_softCO_50diff_minpct0.25.markers.csv")
+```
+
+```{r}
+gene_symbol <- read.delim("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/gene_symbol_table.tsv")
+#TF_table <- read.csv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/DatabaseExtract_v_1.01.txt", sep = "\t")
+human_tf_db<-read_tsv("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/DatabaseExtract_v_1.01.txt", col_types = list(col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character(),col_character()))
+colnames(human_tf_db)<-c("ensembl_gene_id","HGNC_symbol","DBD","Is_TF","TF_assessment","Binding_mode","Motif_status","Final_Notes","Final_Comments","interpro_IDs","EntrezGene_ID","EntrezGene_Description","PDB_ID","TF_tested_by_HT-SELEX","TF _tested_by_PBM","Conditional_Binding_Requirements","Original_Comments","Vaquerizas_2009_classification","CisBP considers_it_a_TF","TFCat_classification","Is_a_GO_TF","Initial_assessment","Curator_1","Curator_2","TFclass_considers it_a_TF","Go_Evidence","Pfam_Domains_By_ENSP_ID")
+
+```
+
+```{r}
+#filter tf
+TF_earlyHBBHBGhigh.markers_20 <- earlyHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_earlyHBBHBGhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_TF_earlyHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+```
+```{r}
+#filter tf
+TF_intHBBHBGhigh.markers_20 <- intHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_intHBBHBGhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_TF_intHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+```
+```{r}
+#filter tf
+TF_lateHBBHBGhigh.markers_20 <- lateHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_lateHBBHBGhigh.markers_20, 
+          "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Hard_Cutoff/2023_TF_lateHBBHBGhigh_hardCO_20diff_minpct0.25.markers.csv")
+```
+
+```{r}
+#filter tf
+TF_soft_earlyHBBHBGhigh.markers_20 <- soft_earlyHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_soft_earlyHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_TF_soft_earlyHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+```
+```{r}
+#filter tf
+TF_soft_lateHBBHBGhigh.markers_20 <- soft_lateHBBHBGhigh.markers_20 %>% 
+  rownames_to_column() %>% 
+  left_join(gene_symbol, by=c("rowname"="external_gene_name")) %>% 
+  left_join(human_tf_db,by=("ensembl_gene_id")) %>% 
+  filter(Is_TF=="Yes")
+write.csv(TF_soft_lateHBBHBGhigh.markers_20, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Tables/Soft_Cutoff/2023_TF_soft_lateHBBHBGhigh_softCO_20diff_minpct0.25.markers.csv")
+```
+
+```{r}
+saveRDS(RBC, "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/hemoglobin_containing_dataset_hardCO_edit2.rds")
+```
+

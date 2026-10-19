@@ -1,0 +1,491 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+expression_table_with_pseudotime_leiden_mod1 <- readRDS("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/expr_pseudotime.rds")
+```
+
+```{r}
+colnames(expression_table_with_pseudotime_leiden_mod1)
+expression_table_with_pseudotime_leiden_mod1$marker
+```
+
+
+```{r}
+cols_pll = c("cyan","blue","hotpink", "red")
+cluster_labels=c("early_HBG","late_HBG","early_HBB", "late_HBB")
+```
+
+
+```{r}
+ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=HBG2,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=HBG2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+NME_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=NME2,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+NME_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=NME2,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+unique(expression_table_with_pseudotime_leiden_mod1) 
+```
+
+
+```{r}
+CENPX_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=CENPX,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=CENPX),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+MYB_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=MYB,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=MYB),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+BCL11A_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=BCL11A,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=BCL11A),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+KLF1_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=KLF1,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=KLF1),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+GATA1_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=GATA1,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=GATA1),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+IKZF1_plot <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=IKZF1,color=HBG2, shape=active_cluster))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "blue", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+library (cowplot)
+```
+
+##########################
+```{r}
+cols_pll = c("cyan","blue","hotpink", "red")
+cluster_labels=c("early_HBG","late_HBG","early_HBB", "late_HBB")
+```
+
+##########################
+
+
+```{r fig.height=4, fig.width=8}
+plot_grid(KLF1_plot, BCL11A_plot, MYB_plot, GATA1_plot, IKZF1_plot, NME_plot, CENPX_plot, 
+          ncol = 3, nrow = 3)
+```
+
+#HBA
+
+```{r}
+NME_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=NME2,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+CENPX_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=CENPX,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=CENPX),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+```{r}
+GATA1_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=GATA1,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=GATA1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+MYB_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=MYB,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=MYB),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+IKZF1_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=IKZF1,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=MYB),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+BCL11A_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=BCL11A,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=MYB),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+KLF1_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=KLF1,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=KLF1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+MTF2_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=MTF2,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=KLF1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+
+
+```{r}
+YBX3_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=YBX3,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=KLF1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+ETS2_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=ETS2,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=KLF1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+DNMT1_p <- ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=HBA1,y=DNMT1,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=HBA1,y=KLF1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+```{r}
+MTF2_p
+```
+
+
+```{r}
+plot_grid(MTF2_p, NME_p, YBX3_p, ETS2_p, DNMT1_p, 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 2, nrow = 4)
+```
+
+```{r}
+#soft cutoff
+RBC <- readRDS("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset.rds")
+```
+```{r}
+table(RBC@active.ident)
+#move soft cutoff to metadata
+RBC$softCO <- Idents(RBC)
+```
+
+```{r}
+RBC <- RenameIdents(object = RBC, 'early_HBG' = "HBG")
+RBC <- RenameIdents(object = RBC, 'early_HBB' = "HBB")
+RBC <- RenameIdents(object = RBC, 'late_HBG' = "HBG")
+RBC <- RenameIdents(object = RBC, 'late_HBB' = "HBB")
+RBC$marker <- Idents(RBC)
+table(RBC$marker)
+```
+
+```{r}
+library(hrbrthemes)
+library(Seurat)
+#RBC$softCO <- Idents(RBC)
+Idents(RBC) <- RBC$softCO
+DefaultAssay(RBC) <- "RNA"
+RBC_expr <- as.data.frame(GetAssayData(object = RBC, slot = "data"))
+```
+
+```{r}
+Meta_data <- RBC@meta.data
+RBC_expr <- t(RBC_expr)
+genes <- c("HBA1", "NME2", "MTF2", "YBX3", "ETS2", "DNMT1")
+RBC_expr <- as.data.frame(RBC_expr)
+
+RBC_expr_subset <- RBC_expr[ ,c("HBA1","NME2", "MTF2", "YBX3", "ETS2", "DNMT1")]
+RBC_expr_subset <- cbind(RBC_expr_subset, Meta_data)
+```
+
+
+
+```{r}
+cols_pll = c("cyan","blue","hotpink", "red")
+cluster_labels=c("early_HBG","late_HBG","early_HBB", "late_HBB")
+```
+
+```{r}
+colnames(Meta_data)
+```
+
+```{r}
+RBC_expr_subset$rownames <- rownames(RBC_expr_subset)
+rownames(RBC_expr_subset) = NULL
+```
+
+```{r}
+NME2_p <- ggplot(RBC_expr_subset, aes(x=HBA1, y=NME2, color=softCO))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = RBC_expr_subset,
+              aes(x=HBA1, y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+
+```{r}
+MTF2_p <- ggplot(RBC_expr_subset, aes(x=HBA1, y=MTF2, color=softCO))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = RBC_expr_subset,
+              aes(x=HBA1, y=MTF2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+MTF2_p
+```
+
+
+```{r}
+YBX3_p <- ggplot(RBC_expr_subset, aes(x=HBA1, y=YBX3, color=softCO))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = RBC_expr_subset,
+              aes(x=HBA1, y=YBX3),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+ETS2_p <- ggplot(RBC_expr_subset, aes(x=HBA1, y=ETS2, color=softCO))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = RBC_expr_subset,
+              aes(x=HBA1, y=ETS2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+DNMT1_p <- ggplot(RBC_expr_subset, aes(x=HBA1, y=DNMT1, color=softCO))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = RBC_expr_subset,
+              aes(x=HBA1, y=DNMT1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+GYPA_p <- ggplot(RBC_expr_subset, aes(x=HBA1, y=GYPA, color=softCO))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = RBC_expr_subset,
+              aes(x=HBA1, y=DNMT1),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+
+```{r}
+library(cowplot)
+plot_grid(MTF2_p, NME2_p, YBX3_p, ETS2_p, DNMT1_p,
+          ncol = 2, nrow = 4)
+```
+
+#New pseudotime
+```{r}
+saveRDS(RBC_expr_subset, file = "/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/paom/RBC_new_pseudotime_obj.rds")
+```
+
+```{r}
+RBC_expr_subset <- readRDS("/Volumes/VC-AO/Peat_backup/RBC_new_pseudotime_obj.rds")
+```
+
+/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset_hardCO.rds

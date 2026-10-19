@@ -1,0 +1,841 @@
+---
+title: "Figures_20221121"
+author: "Sarintip"
+date: "2022-11-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+library(forcats)
+library(viridis)
+library(plotly)
+library(Seurat)
+library(UpSetR)
+library(monocle3)
+```
+```{r}
+integrated_seurat <- readRDS(file="/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Figures/01_Clustered.RDS")
+RBC <- readRDS(file="/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset_hardCO.rds")
+```
+
+```{r fig.height=4, fig.width=6}
+DimPlot(object = integrated_seurat, reduction = "umap", pt.size = 0.1, label = TRUE)
+```
+
+```{r fig.height=5, fig.width=6}
+DimPlot(object = integrated_seurat, reduction = "umap", pt.size = 0.1, label = TRUE, label.size = 3) + theme(#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/01_Clustered.png", width = 6, height = 5, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = integrated_seurat, reduction = "umap", pt.size = 0.1, label = TRUE, label.size = 3) + theme(#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=5, fig.width=6}
+DimPlot(object = integrated_seurat, reduction = "umap",group.by = "seurat_clusters" ,  pt.size = 0.1, label = TRUE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/02_Non-Clustered.png", width = 6, height = 5, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = integrated_seurat, reduction = "umap",group.by = "seurat_clusters" ,  pt.size = 0.1, label = TRUE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=5, fig.width=6}
+DimPlot(object = integrated_seurat, reduction = "umap" ,group.by = "time" ,  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/03_Clustered_groupbytime.png", width = 6, height = 5, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = integrated_seurat, reduction = "umap" ,group.by = "time" ,  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=3, fig.width=8}
+DimPlot(object = integrated_seurat, reduction = "umap", group.by = "time", split.by = "time",  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/04_Clustered_groupbytime_splitbytime.png", width = 8, height = 3, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = integrated_seurat, reduction = "umap", group.by = "time", split.by = "time",  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r}
+Idents(RBC) <- "softCO"
+DefaultAssay(RBC) <- "RNA"
+DimPlot(RBC, label = FALSE, cols = c("cyan","blue","hotpink", "red"))
+```
+```{r fig.height=5, fig.width=6}
+DimPlot(object = RBC, reduction = "umap", pt.size = 0.1, label = FALSE, label.size = 3, cols = c("cyan","blue","hotpink", "red")) + 
+  labs(title = "Scatterplot of dataset",
+              subtitle = "n=11200") + 
+  theme(
+  plot.title = element_text(size = 15, face = "bold", hjust = 0),
+  plot.subtitle = element_text(size = 12, hjust = 0),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/05_RBC.png", width = 6, height = 5, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = RBC, reduction = "umap", pt.size = 0.1, label = FALSE, label.size = 3, cols = c("cyan","blue","hotpink", "red")) + 
+  labs(title = "Scatterplot of dataset",
+              subtitle = "n=11200") + 
+  theme(
+  plot.title = element_text(size = 15, face = "bold", hjust = 0),
+  plot.subtitle = element_text(size = 12, hjust = 0),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=5, fig.width=6}
+DimPlot(object = RBC, reduction = "umap" ,group.by = "time" ,  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/06_RBC_groupbytime.png", width = 6, height = 5, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = RBC, reduction = "umap" ,group.by = "time" ,  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=3, fig.width=8}
+DimPlot(object = RBC, reduction = "umap", group.by = "time", split.by = "time",  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/07_RBC_groupbytime_splitbytime.png", width = 8, height = 3, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+DimPlot(object = RBC, reduction = "umap", group.by = "time", split.by = "time",  pt.size = 0.1, label = FALSE, label.size = 3) + theme(plot.title = element_blank(),#axis.text = element_text(face="bold", size=14),
+                                         #axis.title = element_text(face="bold", size=15),
+                                         legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=8, fig.width=10}
+DefaultAssay(RBC) <- "RNA"
+FeaturePlot(RBC, features=c("CD34", "HBB", "HBG1", "HBG2", "HBA1", "SLC4A1", "GYPA"), ncol = 3)
+```
+```{r fig.height=10, fig.width=10}
+VlnPlot(RBC, features=c("CD34", "HBB", "HBG1", "HBG2", "HBA1", "SLC4A1", "GYPA"), ncol = 3, cols = c("cyan","blue","hotpink", "red"))
+```
+```{r fig.height=7, fig.width=8}
+FeaturePlot(RBC, features=c("CD34", "HBB", "HBG1", "HBG2", "HBA1", "SLC4A1", "GYPA"), ncol = 3) + theme(legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/08_RBC_FeaturePlot.png", width = 8, height = 7, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+FeaturePlot(RBC, features=c("CD34", "HBB", "HBG1", "HBG2", "HBA1", "SLC4A1", "GYPA"), ncol = 3) + theme(legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r fig.height=9, fig.width=9}
+VlnPlot(RBC, features=c("CD34", "HBB", "HBG1", "HBG2", "HBA1", "SLC4A1", "GYPA"), ncol = 3, cols = c("cyan","blue","hotpink", "red"), pt.size = 0.1) + theme(legend.text = element_text(size = 8))
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/09-1_RBC_VlnPlot.png", width = 9, height = 9, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+VlnPlot(RBC, features=c("CD34", "HBB", "HBG1", "HBG2", "HBA1", "SLC4A1", "GYPA"), ncol = 3, cols = c("cyan","blue","hotpink", "red"), pt.size = 0.1) + theme(legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+##################################
+```{r}
+RBC$active_cluster<-Idents(RBC)
+dataset_metadata<-RBC@meta.data
+```
+```{r}
+dataset_metadata%>%group_by(active_cluster, time)%>%tally()%>%mutate(percentage=n/sum(n)*100)->stat_metadata
+```
+```{r}
+stat_metadata
+```
+
+```{r}
+dataset_metadata%>%group_by(time)%>%tally()%>%mutate(percentage=n/sum(n)*100)
+```
+
+```{r}
+dataset_metadata%>%group_by(active_cluster)%>%tally()%>%mutate(percentage=n/sum(n)*100)
+```
+
+```{r}
+dataset_metadata%>%group_by(active_cluster, time)%>%tally()%>%mutate(percentage=n/sum(n)*100)->stat_metadata
+```
+
+
+```{r}
+p<-ggplot(stat_metadata%>%mutate_at(vars(percentage), round, digits =2),aes(x=time,y=percentage,fill=time))+
+  geom_bar(stat="identity",position=position_dodge())+
+  #scale_fill_manual(values=ucols)+
+  ylim(0,60)+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5,position = position_dodge(0.9))+
+  geom_text(aes(label=percentage), vjust=-0.3, color="black", size=3.5,position = position_dodge(0.9))+
+  labs(title= "grouped by time",
+       subtitle = "n=11200")+
+  theme(axis.title.x = element_blank())+
+  facet_grid(cols=(vars(active_cluster)))
+  
+```
+
+```{r}
+p
+```
+
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/10_RBC_Proportion.png", width = 6, height = 5, units = "in",  res = 600, bg ="transparent")
+# 2. Create the plot
+p + theme(legend.text = element_text(size = 8))
+# 3. Close the file
+dev.off()
+```
+
+```{r}
+new_cds_leiden_01 <- readRDS("/mnt/icbs_shared_storage_general_2022/sanger22/scRNAseq_Cordblood/Cordblood_MS2022/Figures/new_cds_leiden_01.rds")
+```
+```{r}
+pseudo_plot<-plot_cells(new_cds_leiden_01,
+           color_cells_by = "pseudotime",
+           label_cell_groups=FALSE,
+           show_trajectory_graph = FALSE,
+           label_leaves=FALSE,
+           label_branch_points=FALSE,
+           label_roots = FALSE,
+           cell_size = 0.25,
+#           cell_stroke = 0,
+           #trajectory_graph_segment_size = 3,
+           graph_label_size=3)
+pseudo_plot
+```
+```{r}
+plot_cells(new_cds_leiden_01,
+           color_cells_by = "active_cluster",
+           label_groups_by_cluster=FALSE,
+           label_leaves=FALSE,
+           label_branch_points=FALSE)
+
+plot_cells(new_cds_leiden_01,
+           color_cells_by = "pseudotime",
+           label_cell_groups=FALSE,
+           label_leaves=FALSE,
+           label_branch_points=FALSE,
+           label_roots = FALSE,
+           cell_size = 0.1,
+           #trajectory_graph_segment_size = 3,
+           graph_label_size=3)
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/17-1_RBC_pseudotime.png", width = 6, height = 5, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+plot_cells(new_cds_leiden_01,
+           color_cells_by = "pseudotime",
+           label_cell_groups=FALSE,
+           label_leaves=FALSE,
+           label_branch_points=FALSE,
+           label_roots = FALSE,
+           cell_size = 0.25,
+           #trajectory_graph_segment_size = 3,
+           graph_label_size=3)
+# 3. Close the file
+dev.off()
+```
+
+```{r}
+cluster_plot <- DimPlot(object = RBC, group.by = "softCO", reduction = "umap", label = FALSE, cols = c("cyan","blue","hotpink", "red")) + theme(plot.title = element_blank())
+```
+```{r fig.height=5, fig.width=12}
+CombinePlots(plots = list(cluster_plot,pseudo_plot), ncol = 2)
+```
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/17-2_RBC_cluster_pseudotime.png", width = 12, height = 5, units = "in",  res = 600, bg ="white")
+CombinePlots(plots = list(cluster_plot,pseudo_plot), ncol = 2)
+# 3. Close the file
+dev.off()
+```
+
+```{r}
+table(RBC@active.ident)
+```
+```{r}
+RBC_hardCO <- readRDS("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset_hardCO.rds")
+#RBC_hardCO <- RBC
+Idents(RBC_hardCO) <- "softCO"
+```
+
+```{r}
+DefaultAssay(RBC_hardCO) <- "RNA"
+earlyHBBHBGhigh.markers <- FindMarkers(RBC_hardCO, ident.1 = "early_HBB", ident.2 = "early_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(earlyHBBHBGhigh.markers, n = 10)
+write.csv(earlyHBBHBGhigh.markers, "/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/earlyHBBHBGhigh_minpct0.25.markers.csv")
+```
+```{r}
+DefaultAssay(RBC_hardCO) <- "RNA"
+lateHBBHBGhigh.markers <- FindMarkers(RBC_hardCO, ident.1 = "late_HBB", ident.2 = "late_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(lateHBBHBGhigh.markers, n = 10)
+write.csv(lateHBBHBGhigh.markers, "/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/lateHBBHBGhigh_minpct0.25.markers.csv")
+```
+```{r}
+TF_table <- read_tsv("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/tf_markers_v2.tsv")
+```
+
+```{r}
+DefaultAssay(RBC_hardCO) <- "RNA"
+lateHBBHBGhigh.markers <- FindMarkers(RBC_hardCO, ident.1 = "late_HBB", ident.2 = "late_HBG", logfc.threshold = 0, base = 2, min.pct = 0.25)
+head(lateHBBHBGhigh.markers, n = 10)
+write.csv(lateHBBHBGhigh.markers, "/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/lateHBBHBGhigh_minpct0.25.markers.csv")
+```
+
+
+```{r}
+log(x, base = exp(1))
+```
+
+
+===used in paper===
+
+
+read seurat object
+```{r}
+integrated_seurat <- RBC
+integrated_seurat<-readRDS(file="/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/hemoglobin_containing_dataset.rds")
+```
+
+```{r}
+expression_table<-GetAssayData(object = integrated_seurat, assay = "RNA")%>%data.frame%>%rownames_to_column()
+```
+
+```{r}
+new_cds_leiden_01<-readRDS("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses_March/new_cds_leiden_01.rds")
+```
+
+```{r}
+cols_pll = c("cyan","blue","hotpink", "red")
+cluster_labels=c("early_HBG","late_HBG","early_HBB", "late_HBB")
+```
+
+```{r}
+hemoglobin_genes <- c("CENPX","NME2", "BCL11A", "KLF1", "GATA1", "IKAROS", "MYB", "HBG2")
+hemoglobin_cds <- new_cds_leiden_01[rowData(new_cds_leiden_01)$gene_short_name %in% hemoglobin_genes,]
+
+pT_leiden<-data.frame(pseudotime_coordinate=pseudotime(hemoglobin_cds))
+```
+select gene
+```{r}
+selected_gene_table<-expression_table%>%filter(rowname %in% c("CENPX","NME2", "BCL11A", "KLF1", "GATA1", "IKAROS", "MYB", "HBG2"))%>%column_to_rownames()%>%t%>%data.frame()%>%rownames_to_column
+```
+
+```{r}
+integrated_seurat$active_cluster<-Idents(integrated_seurat)
+```
+
+```{r}
+info_table<-integrated_seurat$active_cluster%>%data.frame(active_cluster=.)%>%rownames_to_column()
+```
+
+```{r}
+expression_table_with_pseudotime_leiden<-pT_leiden%>%rownames_to_column%>%left_join(selected_gene_table,by="rowname")%>%left_join(info_table,by="rowname")
+```
+
+```{r}
+pseudoleiden_NME2<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=NME2,color=active_cluster))+geom_point(size=0.25)
+```
+```{r}
+expression_table_with_pseudotime_leiden
+```
+
+```{r}
+expression_table_with_pseudotime_leiden_mod1<-expression_table_with_pseudotime_leiden%>%separate("active_cluster", into = c("time","marker"),remove = FALSE)
+```
+NME2
+```{r}
+plot_pseudo_1<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=NME2,color=HBG2))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "purple", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+plot_pseudo_facet<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=NME2,color=active_cluster))+
+  geom_point(size=0.25)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//pseudoleiden_NME2_version3.png"), width=1100, height=250)
+grid.arrange(
+  grobs = list(plot_pseudo_1, plot_pseudo_facet),
+  widths = c(1, 1.6)
+)
+dev.off()
+```
+
+```{r}
+plot_pseudo_1<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=CENPX,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=CENPX),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+plot_pseudo_facet<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=CENPX,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=CENPX),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//pseudoleiden_CENPX_version3.png"), width=1100, height=250)
+grid.arrange(
+  grobs = list(plot_pseudo_1, plot_pseudo_facet),
+  widths = c(1, 1.6)
+)
+dev.off()
+```
+
+
+```{r}
+pseudoleiden_HBA1_smooth<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=HBA1))+geom_point(size=0.25)+geom_smooth(method = "loess")
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//pseudoleiden_HBA1.png"), width=580, height=250)
+grid.arrange(
+  grobs = list(pseudoleiden_HBA1, pseudoleiden_HBA1_smooth),
+  widths = c(1.4, 1)
+)
+dev.off()
+```
+```{r}
+pseudoleiden_SLC4A1<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=SLC4A1,color=active_cluster))+geom_point(size=0.25)
+```
+
+```{r}
+pseudoleiden_SLC4A1_smooth<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=SLC4A1))+geom_point(size=0.25)+geom_smooth(method = "loess")
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//leiden_SLC4A1.png"), width=580, height=250)
+grid.arrange(
+  grobs = list(pseudoleiden_SLC4A1, pseudoleiden_SLC4A1_smooth),
+  widths = c(1.4, 1)
+)
+dev.off()
+```
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+===used in paper===
+
+read seurat object
+```{r}
+integrated_seurat <- readRDS(file="/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/hemoglobin_containing_dataset_hardCO.rds")
+Idents(integrated_seurat) <- "softCO"
+```
+
+```{r}
+expression_table<-GetAssayData(object = integrated_seurat, assay = "RNA")%>%data.frame%>%rownames_to_column()
+```
+
+```{r}
+new_cds_leiden_01<-readRDS("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses_March/new_cds_leiden_01.rds")
+```
+
+```{r}
+cols_pll = c("cyan","blue","hotpink", "red")
+cluster_labels=c("early_HBG","late_HBG","early_HBB", "late_HBB")
+```
+
+```{r}
+hemoglobin_genes <- c("CENPX","NME2", "BCL11A", "KLF1", "GATA1", "IKAROS", "MYB", "HBG2")
+hemoglobin_cds <- new_cds_leiden_01[rowData(new_cds_leiden_01)$gene_short_name %in% hemoglobin_genes,]
+
+pT_leiden<-data.frame(pseudotime_coordinate=pseudotime(hemoglobin_cds))
+```
+select gene
+```{r}
+selected_gene_table<-expression_table%>%filter(rowname %in% c("CENPX","NME2", "BCL11A", "KLF1", "GATA1", "IKAROS", "MYB", "HBG2"))%>%column_to_rownames()%>%t%>%data.frame()%>%rownames_to_column
+```
+
+```{r}
+integrated_seurat$active_cluster<-Idents(integrated_seurat)
+```
+
+```{r}
+info_table<-integrated_seurat$active_cluster%>%data.frame(active_cluster=.)%>%rownames_to_column()
+```
+
+```{r}
+expression_table_with_pseudotime_leiden<-pT_leiden%>%rownames_to_column%>%left_join(selected_gene_table,by="rowname")%>%left_join(info_table,by="rowname")
+```
+
+```{r}
+pseudoleiden_NME2<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=NME2,color=active_cluster))+geom_point(size=0.25)
+```
+```{r}
+expression_table_with_pseudotime_leiden
+```
+
+```{r}
+expression_table_with_pseudotime_leiden_mod1<-expression_table_with_pseudotime_leiden%>%separate("active_cluster", into = c("time","marker"),remove = FALSE)
+```
+NME2
+```{r}
+plot_pseudo_1<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=NME2,color=HBG2))+
+  geom_point(size=0.25)+
+  scale_color_gradient(low = "purple", high="yellow")+
+  #guides(colour = guide_legend(override.aes = list(size=5)))+
+  #scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+plot_pseudo_facet<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=NME2,color=active_cluster))+
+  geom_point(size=0.25)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=NME2),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//pseudoleiden_NME2_version3.png"), width=1100, height=250)
+grid.arrange(
+  grobs = list(plot_pseudo_1, plot_pseudo_facet),
+  widths = c(1, 1.6)
+)
+dev.off()
+```
+
+```{r}
+plot_pseudo_1<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=CENPX,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=CENPX),
+              method = "loess",
+              inherit.aes = FALSE)
+```
+
+```{r}
+plot_pseudo_facet<-ggplot(expression_table_with_pseudotime_leiden_mod1, aes(x=pseudotime_coordinate,y=CENPX,color=active_cluster))+
+  scale_color_manual(values=setNames(cols_pll,cluster_labels))+
+  geom_point(size=0.25)+
+  ylim(0, NA)+
+  guides(colour = guide_legend(override.aes = list(size=5)))+
+  theme_classic()+
+  geom_smooth(data = expression_table_with_pseudotime_leiden_mod1,
+              aes(x=pseudotime_coordinate,y=CENPX),
+              method = "loess",
+              inherit.aes = FALSE)+
+  facet_grid(cols = vars(marker))
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//pseudoleiden_CENPX_version3.png"), width=1100, height=250)
+grid.arrange(
+  grobs = list(plot_pseudo_1, plot_pseudo_facet),
+  widths = c(1, 1.6)
+)
+dev.off()
+```
+
+
+```{r}
+pseudoleiden_HBA1_smooth<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=HBA1))+geom_point(size=0.25)+geom_smooth(method = "loess")
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//pseudoleiden_HBA1.png"), width=580, height=250)
+grid.arrange(
+  grobs = list(pseudoleiden_HBA1, pseudoleiden_HBA1_smooth),
+  widths = c(1.4, 1)
+)
+dev.off()
+```
+```{r}
+pseudoleiden_SLC4A1<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=SLC4A1,color=active_cluster))+geom_point(size=0.25)
+```
+
+```{r}
+pseudoleiden_SLC4A1_smooth<-ggplot(expression_table_with_pseudotime_leiden, aes(x=pseudotime_coordinate,y=SLC4A1))+geom_point(size=0.25)+geom_smooth(method = "loess")
+```
+
+```{r}
+png(filename = paste0("/home/shared_data_vclab_2/SCRNAseq_cordblood/SCRNAseq_cordblood_pakkanan/cod/revised_analyses//leiden_SLC4A1.png"), width=580, height=250)
+grid.arrange(
+  grobs = list(pseudoleiden_SLC4A1, pseudoleiden_SLC4A1_smooth),
+  widths = c(1.4, 1)
+)
+dev.off()
+```
+
+
+################ UpSet Genes
+```{r}
+soft_earlyHBBHBGhigh.markers_20 <- rownames_to_column(soft_earlyHBBHBGhigh.markers_20, var = "gene_id")
+soft_earlyHBBHBGhigh.markers_20_vector <- soft_earlyHBBHBGhigh.markers_20$gene_id
+
+soft_lateHBBHBGhigh.markers_20 <- rownames_to_column(soft_lateHBBHBGhigh.markers_20, var = "gene_id")
+soft_lateHBBHBGhigh.markers_20_vector <- soft_lateHBBHBGhigh.markers_20$gene_id
+
+earlyHBBHBGhigh.markers_20 <- rownames_to_column(earlyHBBHBGhigh.markers_20, var = "gene_id")
+earlyHBBHBGhigh.markers_20_vector <- earlyHBBHBGhigh.markers_20$gene_id
+
+IntHBBHBGhigh.markers_20 <- rownames_to_column(IntHBBHBGhigh.markers_20, var = "gene_id")
+IntHBBHBGhigh.markers_20_vector <- IntHBBHBGhigh.markers_20$gene_id
+
+LateHBBHBGhigh.markers_20 <- rownames_to_column(LateHBBHBGhigh.markers_20, var = "gene_id")
+LateHBBHBGhigh.markers_20_vector <- LateHBBHBGhigh.markers_20$gene_id
+```
+```{r}
+upsetgeneset<-list(
+  early_HBB_vs_HBG=soft_earlyHBBHBGhigh.markers_20_vector,
+  late_HBB_vs_HBG=soft_lateHBBHBGhigh.markers_20_vector,
+  Early_HardCO=earlyHBBHBGhigh.markers_20_vector,
+  Int_HardCO=IntHBBHBGhigh.markers_20_vector,
+  Late_HardCO=LateHBBHBGhigh.markers_20_vector)
+```
+```{r}
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+```
+
+```{r}
+# 1. Open jpeg file
+png("/home/sarintip/scRNAseq_Cordblood/Cordblood_MS2022/Figures/12_UpSetR.png", width = 9, height = 7, units = "in",  res = 600, bg ="white")
+# 2. Create the plot
+upset(fromList(upsetgeneset),
+      set_size.show = TRUE,
+      set_size.scale_max=800,
+      point.size = 6,
+      line.size = 2,
+      text.scale = 2)
+# 3. Close the file
+dev.off()
+```
+
+
+heatmap from seurat
+```{r}
+plot_seurat_heatmap<-function(integrated_seurat,task_name,assay="integrated",slot="scale.data"){
+  name = paste0(directory,task_name)
+  png(filename = paste0(name,"_heatmap_fullheatmap.png"), width=1200, height=5000)
+  p<-DoHeatmap(integrated_seurat, assay = assay,slot=slot, features = VariableFeatures(integrated_seurat)[1:500], cells = 1:500, size = 4, angle = 90)
+print(p)
+dev.off()
+}
+plot_seurat_heatmap_cluster<-function(integrated_seurat,task_name,assay="integrated",slot="scale.data"){
+  name = paste0(directory,task_name)
+  png(filename = paste0(name,"_heatmap_fullheatmap",assay,".png"), width=1200, height=5000)
+  p<-DoHeatmap(subset(integrated_seurat,ident=c("early_HBG_(0)","late_HBG_(2)","early_HBB_(3)","late_HBB_(1)")), assay = assay,slot=slot, features = VariableFeatures(integrated_seurat)[1:500], cells = 1:500, size = 4, angle = 90)
+print(p)
+dev.off()
+}
+```
+
+clustering
+
+Define clustering function
+```{r}
+data_cluster<-function(target_table){
+  hclust_object<-target_table%>%
+  dplyr::select(-contains("max_val"),-contains("min_val"),-contains("max_fc"),-contains("min_fc"),-contains("passed_count"),-contains("passed_count_fc"),-contains("cluster"))%>%
+  column_to_rownames("rowname")%>%
+  as.matrix()%>%
+  hclust.vector(method="ward",metric="euclidean")
+  print("cluster done")
+  return(hclust_object)
+}
+```
+Define update main table function
+```{r}
+update_table_with_cluster<-function(target_table,hclust_object,cluster_number){
+  target_table%>%
+  left_join(hclust_object%>%
+  cutree(k=cluster_number)%>%
+  data.frame()%>%
+  rename_at(vars(.),funs(paste0("cluster")))%>%
+  rownames_to_column(), by=c("rowname"="rowname"))
+}
+```
+Define add index function
+```{r}
+add_index<-function(target_table,hclust_object){
+  target_table[hclust_object$order,]%>%
+  cbind.data.frame(idx=seq(1:nrow(.)))
+}
+
+```
+
+Define change cluster order function
+```{r}
+cluster_reorder<-function(target_table){
+  order_of_cluster<-target_table%>%select(cluster)%>%unlist%>%unique%>%as.character
+  hashmap_of_cluster<-order_of_cluster%>%hashmap(1:length(order_of_cluster))
+  target_table$cluster<-hashmap_of_cluster[[target_table%>%select(contains("cluster"))%>%unlist]]
+  return(target_table)
+}
+```
+
+lazy heatmap
+```{r}
+make_lazyheatmap<-function(matrix_or_interest,heatmap_name){Heatmap(matrix_or_interest, 
+                        #heatmap internal name
+                        name="fold change",
+                        #column ordering and dendogram config
+                        show_column_dend = FALSE,
+                        cluster_columns = FALSE,
+                        #row ordering and dendrogram config
+                        show_row_dend = FALSE, 
+                        cluster_rows = FALSE,
+                        #title config
+                        column_title = heatmap_name,
+                        #row and column name config
+                        show_row_names = TRUE, 
+                        show_column_names = TRUE,
+                        column_names_side = "top",
+                        row_names_side = "left", 
+                        row_names_gp = gpar(fontsize = 15),
+                        #color scale config
+                        col = colorRamp2(c(-2,0,5), c("blue","grey","red")),
+                        #borderconfig
+                        rect_gp = gpar(col = "white", lwd = 2),
+                        #split=5
+                        #set legend
+              
+                        #split=splitter,
+                        use_raster = TRUE,
+                        #annotation
+                        #top_annotation = column_annotation_object
+                        
+                        )
+  
+}
+```
+
+```{r}
+
+#define funtion to convert all markers table to tf only table
+select_tf<-function(marker_table){
+  marker_table%>%
+    rownames_to_column()%>%
+    left_join(gene_symbol_table, by=c("rowname"="external_gene_name"))%>%
+    left_join(human_tf_db,by=("ensembl_gene_id"))%>%
+    filter(Is_TF=="Yes")%>%
+    dplyr::select(rowname,p_val,avg_logFC,pct.1,pct.2,p_val_adj)
+}
+
+select_tf_onegroup<-function(marker_table){
+  marker_table%>%
+    rownames_to_column()%>%
+    left_join(gene_symbol_table, by=c("gene"="external_gene_name"))%>%
+    left_join(human_tf_db,by=("ensembl_gene_id"))%>%
+    filter(Is_TF=="Yes")%>%
+    dplyr::select(gene,p_val,avg_logFC,pct.1,pct.2,p_val_adj)
+}
+gglazyplot<-function(gene1,gene2,DF){
+  ggplot(DF%>%data.frame, aes_string(x=gene1, y=gene2)) + 
+    geom_point(size=0.5)+
+    geom_smooth(method=lm,size=0.5,se=FALSE,color="red")+
+    scale_color_gradient2(low="red", high="blue", midpoint = 0, mid="grey", limit=c(-1,2))
+}
+```
+
+
+
+
+
+```{r}
+sessionInfo()
+```
